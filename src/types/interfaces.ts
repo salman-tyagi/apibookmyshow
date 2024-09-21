@@ -29,9 +29,15 @@ export interface ISignupRequestBody {
   email: string;
 }
 
+export interface ILoginRequestBody {
+  email: string;
+  OTP: number;
+}
+
 export interface IResponseBody {
   status: ResponseStatus.Success;
   result?: number;
+  token?: string;
   message?: string;
   data?: Partial<IUserSchema>;
 }
