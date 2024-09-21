@@ -2,6 +2,8 @@ import { Request, Response, NextFunction } from 'express';
 
 import User from '../models/userModel';
 import { post, controller, bodyValidator } from './decorators';
+import SendMail from '../utils/SendMail';
+import { generateOTP } from '../utils/helpers';
 
 import {
   IResponseBody,
@@ -22,11 +24,18 @@ class AuthController {
     try {
       const { email } = req.body;
 
-      const user = await User.create<Pick<IUserSchema, 'email'>>({ email });
+      const OTP = generateOTP();
 
-      return res.status(200).json({
+      const user = await User.create<Pick<IUserSchema, 'email' | 'OTP'>>({
+        email,
+        OTP
+      });
+
+      SendMail.verifyEmail({ email: user.email, OTP });
+
+      return res.status(201).json({
         status: ResponseStatus.Success,
-        data: user
+        message: 'Email sent successfully. Please verify your email'
       });
     } catch (err) {
       next(err);
