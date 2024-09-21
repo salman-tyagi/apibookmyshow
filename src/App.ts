@@ -3,9 +3,8 @@ import mongoose from 'mongoose';
 import morgan from 'morgan';
 import helmet from 'helmet';
 
-const { NODE_ENV, PORT, DB } = process.env;
-
 import './controllers/AuthController';
+import './controllers/UserController';
 import { router } from './controllers/decorators';
 import AppError from './utils/AppError';
 import globalErrorMiddleware from './middlewares/globalErrorMiddleware';
@@ -17,7 +16,6 @@ class App {
     this.connectDB();
 
     this.app.use(helmet());
-
     this.app.use(morgan('dev'));
     this.app.use(express.json());
 
@@ -29,14 +27,16 @@ class App {
 
     this.app.use(globalErrorMiddleware);
 
-    this.app.listen(Number(PORT), 'localhost', () => {
-      console.log(`Listening on the port ${PORT} in ${NODE_ENV}`);
+    this.app.listen(Number(process.env.PORT), 'localhost', () => {
+      console.log(
+        `Listening on the port ${process.env.PORT} in ${process.env.NODE_ENV}`
+      );
     });
   }
 
   private async connectDB() {
     try {
-      await mongoose.connect(DB!);
+      await mongoose.connect(process.env.DB!);
       mongoose.set({ debug: true });
 
       console.log('DB connected successfully');

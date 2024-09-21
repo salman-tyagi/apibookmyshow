@@ -1,32 +1,12 @@
 import 'reflect-metadata';
-import express, {
-  NextFunction,
-  Request,
-  RequestHandler,
-  Response
-} from 'express';
+import express, { RequestHandler } from 'express';
 
 import Methods from './methods';
 import MetadataKeys from './metadataKeys';
-import AppError from '../../utils/AppError';
+import validateBody from '../../middlewares/validateBody';
+import validateParams from '../../middlewares/validateParams';
 
 export const router = express.Router();
-
-const validateBody = (fields: string[]): RequestHandler => {
-  return (req: Request, res: Response, next: NextFunction): void => {
-    if (!req.body) {
-      return next(new AppError('Invalid request', 400));
-    }
-
-    for (const field of fields) {
-      if (!req.body[field]) {
-        return next(new AppError(`${field} is required`, 400));
-      }
-    }
-
-    return next();
-  };
-};
 
 export const controller = (prefix: string): ClassDecorator => {
   return function (target: Function): void {
@@ -49,23 +29,29 @@ export const controller = (prefix: string): ClassDecorator => {
         Reflect.getMetadata(MetadataKeys.Middleware, target.prototype, key) ||
         [];
 
-      const validator: string[] = Reflect.getMetadata(
-        MetadataKeys.Validator,
-        target.prototype,
-        key
-      );
+      const bodyProps: string[] =
+        Reflect.getMetadata(MetadataKeys.Validator, target.prototype, key) ||
+        [];
 
-      const validateProps = validateBody(validator);
-      middlewares = [validateProps, ...middlewares];
+      const paramProps: string[] =
+        Reflect.getMetadata(MetadataKeys.Params, target.prototype, key) || [];
 
-      // console.log({
-      //   method,
-      //   prefix,
-      //   path,
-      //   validator,
-      //   validateProps,
-      //   middlewares
-      // });
+      const validateBodyProps = validateBody(bodyProps);
+      const validateParamProps = validateParams(paramProps);
+
+      middlewares = [validateParamProps, validateBodyProps, ...middlewares];
+
+      // prefix === '/users' &&
+      //   console.log({
+      //     method,
+      //     prefix,
+      //     path,
+      //     bodyProps,
+      //     paramProps,
+      //     validateBodyProps,
+      //     validateParamProps,
+      //     middlewares
+      //   });
 
       if (path) {
         router[method](`${prefix}${path}`, ...middlewares, handler);

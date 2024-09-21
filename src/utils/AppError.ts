@@ -1,4 +1,4 @@
-import { ResponseStatus } from '../types';
+import { ResStatus } from '../types';
 
 class AppError extends Error {
   status: string;
@@ -8,8 +8,8 @@ class AppError extends Error {
     super(message);
 
     this.status = `${statusCode}`.startsWith('4')
-      ? ResponseStatus.Fail
-      : ResponseStatus.Error;
+      ? ResStatus.Fail
+      : ResStatus.Error;
     this.isOperational = true;
   }
 }

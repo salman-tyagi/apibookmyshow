@@ -1,4 +1,7 @@
-import { ResponseStatus } from './enums';
+import { Types } from 'mongoose';
+import { Request } from 'express';
+
+import { ResStatus } from './enums';
 
 type Role = 'admin' | 'user';
 type Identity = 'man' | 'woman';
@@ -25,21 +28,30 @@ export interface IUserSchema {
 }
 
 // Controller interfaces
-export interface ISignupRequestBody {
+export interface ISignupReqBody {
   email: string;
 }
 
-export interface ILoginRequestBody {
+export interface ILoginReqBody {
   email: string;
   OTP: number;
 }
 
-export interface IResponseBody {
-  status: ResponseStatus.Success;
+export interface IReqBodyWithId {
+  id: Types.ObjectId;
+}
+
+export interface IResBody {
+  status: ResStatus.Success;
   result?: number;
   token?: string;
   message?: string;
-  data?: Partial<IUserSchema>;
+  data?: Partial<IUserSchema> | IUserSchema[];
+}
+
+// Middleware interfaces
+export interface IReqWithUser extends Request {
+  user?: IUserSchema;
 }
 
 // Mail interface

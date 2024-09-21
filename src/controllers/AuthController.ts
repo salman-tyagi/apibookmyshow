@@ -2,16 +2,16 @@ import { Request, Response, NextFunction } from 'express';
 
 import User from '../models/userModel';
 import { post, controller, bodyValidator } from './decorators';
-// import SendMail from '../utils/SendMail';
+import SendMail from '../utils/SendMail';
 import { generateJwt, generateOTP } from '../utils/helpers';
 import AppError from '../utils/AppError';
 
 import {
-  ILoginRequestBody,
-  IResponseBody,
-  ISignupRequestBody,
+  ILoginReqBody,
+  IResBody,
+  ISignupReqBody,
   IUserSchema,
-  ResponseStatus
+  ResStatus
 } from '../types';
 
 @controller('/auth')
@@ -19,8 +19,8 @@ class AuthController {
   @post('/signup')
   @bodyValidator('email')
   async signup(
-    req: Request<{}, {}, ISignupRequestBody>,
-    res: Response<IResponseBody>,
+    req: Request<{}, {}, ISignupReqBody>,
+    res: Response<IResBody>,
     next: NextFunction
   ): Promise<any> {
     try {
@@ -40,10 +40,10 @@ class AuthController {
         await user.save({ validateBeforeSave: true });
       }
 
-      // SendMail.verifyEmail({ email: user.email, OTP });
+      SendMail.verifyEmail({ email: user.email, OTP });
 
       return res.status(201).json({
-        status: ResponseStatus.Success,
+        status: ResStatus.Success,
         message: 'OTP sent! Please verify your email'
       });
     } catch (err) {
@@ -54,8 +54,8 @@ class AuthController {
   @post('/login')
   @bodyValidator('email', 'OTP')
   async login(
-    req: Request<{}, {}, ILoginRequestBody>,
-    res: Response<IResponseBody>,
+    req: Request<{}, {}, ILoginReqBody>,
+    res: Response<IResBody>,
     next: NextFunction
   ): Promise<any> {
     try {
@@ -63,7 +63,7 @@ class AuthController {
 
       const user = await User.findOneAndUpdate(
         { email, OTP },
-        { $set: { verified: true }, $unset: { OTP: null } },
+        { $set: { verified: true }, $unset: { OTP: '' } },
         { runValidators: true, new: true }
       );
 
@@ -76,7 +76,7 @@ class AuthController {
       );
 
       return res.status(201).json({
-        status: ResponseStatus.Success,
+        status: ResStatus.Success,
         token
         // data: user
       });
