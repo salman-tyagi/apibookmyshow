@@ -1,6 +1,7 @@
 import express, { NextFunction, Request, Response } from 'express';
 import mongoose from 'mongoose';
 import morgan from 'morgan';
+import helmet from 'helmet';
 
 const { NODE_ENV, PORT, DB } = process.env;
 
@@ -15,6 +16,8 @@ class App {
   constructor() {
     this.connectDB();
 
+    this.app.use(helmet());
+
     this.app.use(morgan('dev'));
     this.app.use(express.json());
 
@@ -22,7 +25,7 @@ class App {
 
     this.app.all('*', (req: Request, res: Response, next: NextFunction) => {
       return next(new AppError(`${req.originalUrl} does not exist`, 404));
-    })
+    });
 
     this.app.use(globalErrorMiddleware);
 
