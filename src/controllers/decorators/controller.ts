@@ -38,7 +38,6 @@ export const controller = (prefix: string): ClassDecorator => {
 
       const validateBodyProps = validateBody(bodyProps);
       const validateParamProps = validateParams(paramProps);
-
       middlewares = [validateParamProps, validateBodyProps, ...middlewares];
 
       // prefix === '/users' &&
@@ -48,8 +47,8 @@ export const controller = (prefix: string): ClassDecorator => {
       //     path,
       //     bodyProps,
       //     paramProps,
-      //     validateBodyProps,
       //     validateParamProps,
+      //     validateBodyProps,
       //     middlewares
       //   });
 

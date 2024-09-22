@@ -1,7 +1,7 @@
 import { Request, Response, NextFunction } from 'express';
 
 import AppError from '../utils/AppError';
-import { ResStatus } from '../types';
+import { IResError, ResStatus } from '../types';
 
 const jwtInvalidTokenErr = () =>
   new AppError('Invalid token. Please login again', 403);
@@ -9,7 +9,7 @@ const jwtInvalidTokenErr = () =>
 const jwtTokenExpiredErr = () =>
   new AppError('Token expired. Please login again', 403);
 
-const sendDevErr = (err: AppError, res: Response) => {
+const sendDevErr = (err: AppError, res: Response<IResError>) => {
   return res.status(err.statusCode).json({
     status: ResStatus.Fail,
     message: err.message,
@@ -18,14 +18,14 @@ const sendDevErr = (err: AppError, res: Response) => {
   });
 };
 
-const sendProErr = (err: AppError, res: Response) => {
+const sendProErr = (err: AppError, res: Response<IResError>) => {
   return res.status(err.statusCode).json({
-    status: err.status,
+    status: ResStatus.Fail,
     message: err.message
   });
 };
 
-const sendUnknownErr = (res: Response) => {
+const sendUnknownErr = (res: Response<IResError>) => {
   return res.status(500).json({
     status: ResStatus.Error,
     message: 'Something went wrong'
@@ -41,7 +41,7 @@ const globalErrorMiddleware = (
   console.log(err);
 
   let error = err;
-  error.status = error.status || ResStatus.Error;
+  // error.status = error.status || ResStatus.Error;
   error.statusCode = error.statusCode || 500;
 
   if (error.name === 'JsonWebTokenError') error = jwtInvalidTokenErr();

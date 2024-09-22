@@ -1,6 +1,8 @@
 import { Types } from 'mongoose';
 import { Request } from 'express';
 
+import AppError from '../utils/AppError';
+
 import { ResStatus } from './enums';
 
 type Role = 'admin' | 'user';
@@ -8,6 +10,7 @@ type Identity = 'man' | 'woman';
 
 // Model interfaces
 export interface IUserSchema {
+  _id: Types.ObjectId;
   firstName: string;
   lastName: string;
   email: string;
@@ -60,4 +63,11 @@ export interface MailOptions {
   name?: string;
   link?: string;
   OTP?: number;
+}
+
+export interface IResError {
+  status: ResStatus.Fail | ResStatus.Error;
+  message: string;
+  error?: AppError;
+  stack?: string;
 }

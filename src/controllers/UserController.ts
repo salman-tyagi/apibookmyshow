@@ -3,13 +3,16 @@ import { NextFunction, Request, Response } from 'express';
 import User from '../models/userModel';
 import { get, controller, del, use } from './decorators';
 import AppError from '../utils/AppError';
+import protect from '../middlewares/protect';
+import accessAllowedTo from '../middlewares/accessAllowedTo';
 
 import { IReqBodyWithId, IResBody, ResStatus } from '../types';
-import protect from '../middlewares/protect';
 
 @controller('/users')
 class UserController {
   @get('/')
+  @use(protect)
+  @use(accessAllowedTo('admin'))
   async getAllUsers(
     req: Request,
     res: Response<IResBody>,
@@ -52,6 +55,7 @@ class UserController {
 
   @del('/:id')
   @use(protect)
+  @use(accessAllowedTo('admin'))
   async deleteUser(
     req: Request<IReqBodyWithId>,
     res: Response<IResBody>,
@@ -61,11 +65,7 @@ class UserController {
       const { id } = req.params;
       if (!id) next(new AppError('User id is required', 404));
 
-      const user = await User.findOneAndUpdate(
-        { _id: id },
-        { $set: { active: false, verified: false } }
-      );
-
+      const user = await User.findOneAndDelete({ _id: id });
       if (!user) return next(new AppError('No user found', 404));
 
       return res.status(204).json({

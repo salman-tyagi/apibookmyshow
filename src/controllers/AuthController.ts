@@ -1,18 +1,21 @@
 import { Request, Response, NextFunction } from 'express';
 
 import User from '../models/userModel';
-import { post, controller, bodyValidator } from './decorators';
+import { post, controller, bodyValidator, del, use, get } from './decorators';
 import SendMail from '../utils/SendMail';
 import { generateJwt, generateOTP } from '../utils/helpers';
 import AppError from '../utils/AppError';
+import protect from '../middlewares/protect';
 
 import {
   ILoginReqBody,
+  IReqWithUser,
   IResBody,
   ISignupReqBody,
   IUserSchema,
   ResStatus
 } from '../types';
+import accessAllowedTo from '../middlewares/accessAllowedTo';
 
 @controller('/auth')
 class AuthController {
@@ -35,8 +38,11 @@ class AuthController {
           OTP
         });
       } else {
+        if (!user.active)
+          return next(new AppError('Your account has been deleted', 401));
+
         user.OTP = OTP;
-        user.verified = false;
+        // user.verified = false;
         await user.save({ validateBeforeSave: true });
       }
 
@@ -79,6 +85,53 @@ class AuthController {
         status: ResStatus.Success,
         token
         // data: user
+      });
+    } catch (err) {
+      next(err);
+    }
+  }
+
+  @get('/logout')
+  @use(protect)
+  async logout(
+    req: IReqWithUser,
+    res: Response<IResBody>,
+    next: NextFunction
+  ): Promise<any> {
+    try {
+      await User.updateOne(
+        { _id: req.user?._id },
+        { $set: { verified: false } }
+      );
+
+      return res.status(200).json({
+        status: ResStatus.Success,
+        message: 'User logged out successfully'
+      });
+    } catch (err) {
+      next(err);
+    }
+  }
+
+  @del('/delete-account')
+  @use(protect)
+  @use(accessAllowedTo('user'))
+  async deleteUser(
+    req: IReqWithUser,
+    res: Response<IResBody>,
+    next: NextFunction
+  ): Promise<any> {
+    try {
+      const user = await User.findOneAndUpdate(
+        { _id: req.user!._id },
+        { $set: { active: false, verified: false } }
+      );
+
+      if (!user) return next(new AppError('No user found', 404));
+
+      return res.status(204).json({
+        status: ResStatus.Success,
+        message: 'User deleted successfully'
       });
     } catch (err) {
       next(err);
