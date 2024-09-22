@@ -3,7 +3,7 @@ import { Request } from 'express';
 
 import AppError from '../utils/AppError';
 
-import { ResStatus } from './enums';
+import { ResData, ResStatus } from './enums';
 
 type Role = 'admin' | 'user';
 type Identity = 'man' | 'woman';
@@ -40,6 +40,34 @@ export interface ILoginReqBody {
   OTP: number;
 }
 
+export interface IMovieSchema {
+  title: string;
+  image: string;
+  poster: string;
+  languages: string[];
+  duration: number; // in mins
+  likesQuantity: number;
+  likesAverage: number;
+  comments: string;
+  genres: string[];
+  releaseDate: Date;
+  about: string;
+  cast: { actor: string[]; actress: string[] };
+  crew: { [key: string]: string };
+  createdAt: Date;
+}
+
+export interface IMovieReqBody {
+  title: string;
+  languages: string[];
+  duration: number;
+  genres: string[];
+  releaseDate: Date;
+  about: string;
+  cast: { actor: string[]; actress: string[] };
+  crew: { [key: string]: string };
+}
+
 export interface IReqBodyWithId {
   id: Types.ObjectId;
 }
@@ -49,7 +77,7 @@ export interface IResBody {
   result?: number;
   token?: string;
   message?: string;
-  data?: Partial<IUserSchema> | IUserSchema[];
+  data?: ResData;
 }
 
 // Middleware interfaces

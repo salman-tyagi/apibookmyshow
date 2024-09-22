@@ -6,6 +6,7 @@ import SendMail from '../utils/SendMail';
 import { generateJwt, generateOTP } from '../utils/helpers';
 import AppError from '../utils/AppError';
 import protect from '../middlewares/protect';
+import accessAllowedTo from '../middlewares/accessAllowedTo';
 
 import {
   ILoginReqBody,
@@ -15,7 +16,6 @@ import {
   IUserSchema,
   ResStatus
 } from '../types';
-import accessAllowedTo from '../middlewares/accessAllowedTo';
 
 @controller('/auth')
 class AuthController {
@@ -42,7 +42,7 @@ class AuthController {
           return next(new AppError('Your account has been deleted', 401));
 
         user.OTP = OTP;
-        // user.verified = false;
+        user.verified = false;
         await user.save({ validateBeforeSave: true });
       }
 

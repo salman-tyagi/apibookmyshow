@@ -5,7 +5,10 @@ import helmet from 'helmet';
 
 import './controllers/AuthController';
 import './controllers/UserController';
+import './controllers/MovieController';
+
 import { router } from './controllers/decorators';
+
 import AppError from './utils/AppError';
 import globalErrorMiddleware from './middlewares/globalErrorMiddleware';
 
@@ -21,7 +24,7 @@ class App {
 
     this.app.use('/api/v1', router);
 
-    this.app.all('*', (req: Request, res: Response, next: NextFunction) => {
+    this.app.all('*', (req: Request, res: Response, next: NextFunction): void => {
       return next(new AppError(`${req.originalUrl} does not exist`, 404));
     });
 

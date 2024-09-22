@@ -3,6 +3,17 @@ import { Request, Response, NextFunction } from 'express';
 import AppError from '../utils/AppError';
 import { IResError, ResStatus } from '../types';
 
+const mongoValidationErr = (err: AppError) => {
+  const message = err.message
+    .split(':')
+    .slice(1)
+    .join(':')
+    .trim()
+    .toLowerCase();
+    
+  return new AppError(message, 400);
+};
+
 const jwtInvalidTokenErr = () =>
   new AppError('Invalid token. Please login again', 403);
 
@@ -44,6 +55,7 @@ const globalErrorMiddleware = (
   // error.status = error.status || ResStatus.Error;
   error.statusCode = error.statusCode || 500;
 
+  if (error.name === 'ValidationError') error = mongoValidationErr(err);
   if (error.name === 'JsonWebTokenError') error = jwtInvalidTokenErr();
   if (error.name === 'TokenExpiredError') error = jwtTokenExpiredErr();
 

@@ -9,7 +9,7 @@ import validateParams from '../../middlewares/validateParams';
 export const router = express.Router();
 
 export const controller = (prefix: string): ClassDecorator => {
-  return function (target: Function): void {
+  return (target: Function): void => {
     for (const key in target.prototype) {
       const path: string = Reflect.getMetadata(
         MetadataKeys.Path,
@@ -40,7 +40,7 @@ export const controller = (prefix: string): ClassDecorator => {
       const validateParamProps = validateParams(paramProps);
       middlewares = [validateParamProps, validateBodyProps, ...middlewares];
 
-      // prefix === '/users' &&
+      // prefix === '/movies' &&
       //   console.log({
       //     method,
       //     prefix,
