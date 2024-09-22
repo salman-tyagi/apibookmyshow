@@ -1,6 +1,36 @@
 import { Request, Response, NextFunction } from 'express';
 
 import AppError from '../utils/AppError';
+import { ResStatus } from '../types';
+
+const jwtInvalidTokenErr = () =>
+  new AppError('Invalid token. Please login again', 403);
+
+const jwtTokenExpiredErr = () =>
+  new AppError('Token expired. Please login again', 403);
+
+const sendDevErr = (err: AppError, res: Response) => {
+  return res.status(err.statusCode).json({
+    status: ResStatus.Fail,
+    message: err.message,
+    error: err,
+    stack: err.stack
+  });
+};
+
+const sendProErr = (err: AppError, res: Response) => {
+  return res.status(err.statusCode).json({
+    status: err.status,
+    message: err.message
+  });
+};
+
+const sendUnknownErr = (res: Response) => {
+  return res.status(500).json({
+    status: ResStatus.Error,
+    message: 'Something went wrong'
+  });
+};
 
 const globalErrorMiddleware = (
   err: AppError,
@@ -10,22 +40,16 @@ const globalErrorMiddleware = (
 ) => {
   console.log(err);
 
-  err.status = err.status || 'error';
-  err.statusCode = err.statusCode || 500;
+  let error = err;
+  error.status = error.status || ResStatus.Error;
+  error.statusCode = error.statusCode || 500;
 
-  if (process.env.NODE_ENV === 'development') {
-    return res.status(err.statusCode).json({
-      status: err.status,
-      message: err.message,
-      error: err,
-      stack: err.stack
-    });
-  }
+  if (error.name === 'JsonWebTokenError') error = jwtInvalidTokenErr();
+  if (error.name === 'TokenExpiredError') error = jwtTokenExpiredErr();
 
-  return res.status(500).json({
-    status: 'error',
-    message: 'Something went wrong'
-  });
+  if (process.env.NODE_ENV === 'development') return sendDevErr(error, res);
+  if (process.env.NODE_ENV === 'production')
+    return error.isOperational ? sendProErr(error, res) : sendUnknownErr(res);
 };
 
 export default globalErrorMiddleware;
