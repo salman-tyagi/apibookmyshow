@@ -32,21 +32,36 @@ const movieSchema = new mongoose.Schema<IMovieSchema>(
       minlength: [6, 'Min length required is 6'],
       maxlength: [30, 'Max length required is 30']
     },
-    likesQuantity: {
-      type: Number,
-      default: 1
-    },
-    likesAverage: {
-      type: Number,
-      default: 0
-    },
-    comments: {
+    review: {
       type: String,
       trim: true,
+      default: 'Good movie',
       minlength: [6, 'Min length required is 6'],
       maxlength: [30, 'Max length required is 30']
     },
+    ratingsQuantity: {
+      type: Number,
+      default: 1,
+      min: 1,
+      max: 10
+    },
+    ratingsAverage: {
+      type: Number,
+      default: 0
+    },
+    likes: {
+      type: Number,
+      default: 1
+    },
     genres: { type: [String], required: [true, 'Genre is required'] },
+    screen: { type: [String], required: [true, 'Must have a screen'] },
+    certification: {
+      type: String,
+      required: [true, 'Please certification rating'],
+      trim: true,
+      minlength: [1, 'Min length required is 1'],
+      maxlength: [2, 'Max length required is 2']
+    },
     releaseDate: { type: Date, required: [true, 'Release date is required'] },
     about: {
       type: String,
@@ -61,7 +76,16 @@ const movieSchema = new mongoose.Schema<IMovieSchema>(
       _id: false
     },
     crew: {
-      type: Object,
+      type: {
+        director: [String],
+        producer: [String],
+        executiveProducer: [String],
+        cinematographer: [String],
+        editor: [String],
+        writer: [String],
+        musician: [String],
+        screenplay: [String]
+      },
       required: [true, 'Must have a crew'],
       _id: false
     },

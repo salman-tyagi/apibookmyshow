@@ -3,6 +3,10 @@ import { Request, Response, NextFunction } from 'express';
 import AppError from '../utils/AppError';
 import { IResError, ResStatus } from '../types';
 
+const mongoDuplicateErr = (err: any) => {
+  console.log(...err.error.errorResponse);
+};
+
 const mongoValidationErr = (err: AppError) => {
   const message = err.message
     .split(':')
@@ -10,7 +14,7 @@ const mongoValidationErr = (err: AppError) => {
     .join(':')
     .trim()
     .toLowerCase();
-    
+
   return new AppError(message, 400);
 };
 
@@ -22,7 +26,7 @@ const jwtTokenExpiredErr = () =>
 
 const sendDevErr = (err: AppError, res: Response<IResError>) => {
   return res.status(err.statusCode).json({
-    status: ResStatus.Fail,
+    status: err.status,
     message: err.message,
     error: err,
     stack: err.stack
@@ -44,24 +48,28 @@ const sendUnknownErr = (res: Response<IResError>) => {
 };
 
 const globalErrorMiddleware = (
-  err: AppError,
+  err: any,
   req: Request,
   res: Response,
   next: NextFunction
 ) => {
   console.log(err);
 
-  let error = err;
-  // error.status = error.status || ResStatus.Error;
-  error.statusCode = error.statusCode || 500;
+  err.status = err.status || ResStatus.Error;
+  err.statusCode = err.statusCode || 500;
 
-  if (error.name === 'ValidationError') error = mongoValidationErr(err);
-  if (error.name === 'JsonWebTokenError') error = jwtInvalidTokenErr();
-  if (error.name === 'TokenExpiredError') error = jwtTokenExpiredErr();
+  if (process.env.NODE_ENV === 'development') return sendDevErr(err, res);
 
-  if (process.env.NODE_ENV === 'development') return sendDevErr(error, res);
-  if (process.env.NODE_ENV === 'production')
+  if (process.env.NODE_ENV === 'production') {
+    let error = err;
+
+    if (error.name === 'ValidationError') error = mongoValidationErr(err);
+    if (error.code === 11000) error = mongoDuplicateErr(err);
+    if (error.name === 'JsonWebTokenError') error = jwtInvalidTokenErr();
+    if (error.name === 'TokenExpiredError') error = jwtTokenExpiredErr();
+
     return error.isOperational ? sendProErr(error, res) : sendUnknownErr(res);
+  }
 };
 
 export default globalErrorMiddleware;

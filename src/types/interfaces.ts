@@ -46,14 +46,26 @@ export interface IMovieSchema {
   poster: string;
   languages: string[];
   duration: number; // in mins
-  likesQuantity: number;
-  likesAverage: number;
-  comments: string;
+  review: string;
+  ratingsQuantity: number;
+  ratingsAverage: number;
+  likes: number;
   genres: string[];
+  screen: string[];
+  certification: string;
   releaseDate: Date;
   about: string;
   cast: { actor: string[]; actress: string[] };
-  crew: { [key: string]: string };
+  crew: {
+    director: string[];
+    producer: string[];
+    executiveProducer: string[];
+    cinematographer: string[];
+    editor: string[];
+    writer: string[];
+    musician: string[];
+    screenplay: string[];
+  };
   createdAt: Date;
 }
 
@@ -62,10 +74,21 @@ export interface IMovieReqBody {
   languages: string[];
   duration: number;
   genres: string[];
+  screen: string[];
+  certification: string;
   releaseDate: Date;
   about: string;
   cast: { actor: string[]; actress: string[] };
-  crew: { [key: string]: string };
+  crew: {
+    director: string[];
+    producer: string[];
+    executiveProducer: string[];
+    cinematographer: string[];
+    editor: string[];
+    writer: string[];
+    musician: string[];
+    screenplay: string[];
+  };
 }
 
 export interface IReqBodyWithId {
@@ -94,7 +117,7 @@ export interface MailOptions {
 }
 
 export interface IResError {
-  status: ResStatus.Fail | ResStatus.Error;
+  status: string;
   message: string;
   error?: AppError;
   stack?: string;
