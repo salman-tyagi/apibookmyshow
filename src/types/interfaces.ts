@@ -7,6 +7,7 @@ import { ResData, ResStatus } from './enums';
 
 type Role = 'admin' | 'user';
 type Identity = 'man' | 'woman';
+type MultiplexChain = 'inox' | 'pvr' | 'cinepolis';
 
 // Model interfaces
 export interface IUserSchema {
@@ -88,6 +89,50 @@ export interface IMovieReqBody {
     writer: string[];
     musician: string[];
     screenplay: string[];
+  };
+}
+
+export interface ICinemaSchema {
+  name: string;
+  // screen: string[];
+  multiplexChain: MultiplexChain;
+  movies: string[];
+  location: { lat: number; lng: number };
+  address: string;
+  city: string;
+  state: string;
+  pincode: number;
+  region: string;
+  country: string;
+  facilities: {
+    ticketCancellation: boolean;
+    foodAndBeverages: boolean;
+    mTicket: boolean;
+    wheelChair: boolean;
+    parking: boolean;
+    foodCourt: boolean;
+  };
+}
+
+export interface ICinemaReqBody {
+  name: string;
+  // screen: string[];
+  multiplexChain: MultiplexChain;
+  // movies: string[];
+  location: { lat: number; lng: number };
+  address: string;
+  city: string;
+  state: string;
+  pincode: number;
+  region: string;
+  country: string;
+  facilities: {
+    ticketCancellation: boolean;
+    foodAndBeverages: boolean;
+    mTicket: boolean;
+    wheelChair: boolean;
+    parking: boolean;
+    foodCourt: boolean;
   };
 }
 

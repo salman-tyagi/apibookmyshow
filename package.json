@@ -6,7 +6,8 @@
   "scripts": {
     "tsc": "tsc --watch",
     "node": "node --watch --env-file .env build/App.js",
-    "dev": "concurrently npm:tsc npm:node"
+    "dev": "concurrently npm:tsc npm:node",
+    "pro": "NODE_ENV=production npm run dev"
   },
   "author": "Salman Tyagi",
   "license": "ISC",
