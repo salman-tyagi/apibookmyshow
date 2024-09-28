@@ -1,6 +1,7 @@
 import 'reflect-metadata';
 
 import MetadataKeys from './metadataKeys';
+import Methods from './methods';
 
 type Callback = (path: string) => MethodDecorator;
 
@@ -17,4 +18,8 @@ const routerBinder = (method: string): Callback => {
   };
 };
 
-export const post = routerBinder('post');
+export const post = routerBinder(Methods.Post);
+export const get = routerBinder(Methods.Get);
+export const patch = routerBinder(Methods.Patch);
+export const put = routerBinder(Methods.Put);
+export const del = routerBinder(Methods.Delete);

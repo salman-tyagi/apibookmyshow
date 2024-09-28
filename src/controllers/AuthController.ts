@@ -1,17 +1,20 @@
 import { Request, Response, NextFunction } from 'express';
 
 import User from '../models/userModel';
-import { post, controller, bodyValidator } from './decorators';
-// import SendMail from '../utils/SendMail';
+import { post, controller, bodyValidator, del, use, get } from './decorators';
+import SendMail from '../utils/SendMail';
 import { generateJwt, generateOTP } from '../utils/helpers';
 import AppError from '../utils/AppError';
+import protect from '../middlewares/protect';
+import accessAllowedTo from '../middlewares/accessAllowedTo';
 
 import {
-  ILoginRequestBody,
-  IResponseBody,
-  ISignupRequestBody,
+  ILoginReqBody,
+  IReqWithUser,
+  IResBody,
+  ISignupReqBody,
   IUserSchema,
-  ResponseStatus
+  ResStatus
 } from '../types';
 
 @controller('/auth')
@@ -19,8 +22,8 @@ class AuthController {
   @post('/signup')
   @bodyValidator('email')
   async signup(
-    req: Request<{}, {}, ISignupRequestBody>,
-    res: Response<IResponseBody>,
+    req: Request<{}, {}, ISignupReqBody>,
+    res: Response<IResBody>,
     next: NextFunction
   ): Promise<any> {
     try {
@@ -35,15 +38,18 @@ class AuthController {
           OTP
         });
       } else {
+        if (!user.active)
+          return next(new AppError('Your account has been deleted', 401));
+
         user.OTP = OTP;
         user.verified = false;
         await user.save({ validateBeforeSave: true });
       }
 
-      // SendMail.verifyEmail({ email: user.email, OTP });
+      SendMail.verifyEmail({ email: user.email, OTP });
 
       return res.status(201).json({
-        status: ResponseStatus.Success,
+        status: ResStatus.Success,
         message: 'OTP sent! Please verify your email'
       });
     } catch (err) {
@@ -54,8 +60,8 @@ class AuthController {
   @post('/login')
   @bodyValidator('email', 'OTP')
   async login(
-    req: Request<{}, {}, ILoginRequestBody>,
-    res: Response<IResponseBody>,
+    req: Request<{}, {}, ILoginReqBody>,
+    res: Response<IResBody>,
     next: NextFunction
   ): Promise<any> {
     try {
@@ -63,7 +69,7 @@ class AuthController {
 
       const user = await User.findOneAndUpdate(
         { email, OTP },
-        { $set: { verified: true }, $unset: { OTP: null } },
+        { $set: { verified: true }, $unset: { OTP: '' } },
         { runValidators: true, new: true }
       );
 
@@ -76,9 +82,56 @@ class AuthController {
       );
 
       return res.status(201).json({
-        status: ResponseStatus.Success,
+        status: ResStatus.Success,
         token
         // data: user
+      });
+    } catch (err) {
+      next(err);
+    }
+  }
+
+  @get('/logout')
+  @use(protect)
+  async logout(
+    req: IReqWithUser,
+    res: Response<IResBody>,
+    next: NextFunction
+  ): Promise<any> {
+    try {
+      await User.updateOne(
+        { _id: req.user?._id },
+        { $set: { verified: false } }
+      );
+
+      return res.status(200).json({
+        status: ResStatus.Success,
+        message: 'User logged out successfully'
+      });
+    } catch (err) {
+      next(err);
+    }
+  }
+
+  @del('/delete-account')
+  @use(protect)
+  @use(accessAllowedTo('user'))
+  async deleteUser(
+    req: IReqWithUser,
+    res: Response<IResBody>,
+    next: NextFunction
+  ): Promise<any> {
+    try {
+      const user = await User.findOneAndUpdate(
+        { _id: req.user!._id },
+        { $set: { active: false, verified: false } }
+      );
+
+      if (!user) return next(new AppError('No user found', 404));
+
+      return res.status(204).json({
+        status: ResStatus.Success,
+        message: 'User deleted successfully'
       });
     } catch (err) {
       next(err);

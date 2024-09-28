@@ -14,7 +14,7 @@ export const use = (middleware: RequestHandler): MethodDecorator => {
 
     Reflect.defineMetadata(
       MetadataKeys.Middleware,
-      [...middlewares, middleware],
+      [middleware, ...middlewares],
       target,
       key
     );

@@ -1,10 +1,16 @@
-import { ResponseStatus } from './enums';
+import { Types } from 'mongoose';
+import { Request } from 'express';
+
+import AppError from '../utils/AppError';
+
+import { ResData, ResStatus } from './enums';
 
 type Role = 'admin' | 'user';
 type Identity = 'man' | 'woman';
 
 // Model interfaces
 export interface IUserSchema {
+  _id: Types.ObjectId;
   firstName: string;
   lastName: string;
   email: string;
@@ -25,21 +31,81 @@ export interface IUserSchema {
 }
 
 // Controller interfaces
-export interface ISignupRequestBody {
+export interface ISignupReqBody {
   email: string;
 }
 
-export interface ILoginRequestBody {
+export interface ILoginReqBody {
   email: string;
   OTP: number;
 }
 
-export interface IResponseBody {
-  status: ResponseStatus.Success;
+export interface IMovieSchema {
+  title: string;
+  image: string;
+  poster: string;
+  languages: string[];
+  duration: number; // in mins
+  review: string;
+  ratingsQuantity: number;
+  ratingsAverage: number;
+  likes: number;
+  genres: string[];
+  screen: string[];
+  certification: string;
+  releaseDate: Date;
+  about: string;
+  cast: { actor: string[]; actress: string[] };
+  crew: {
+    director: string[];
+    producer: string[];
+    executiveProducer: string[];
+    cinematographer: string[];
+    editor: string[];
+    writer: string[];
+    musician: string[];
+    screenplay: string[];
+  };
+  createdAt: Date;
+}
+
+export interface IMovieReqBody {
+  title: string;
+  languages: string[];
+  duration: number;
+  genres: string[];
+  screen: string[];
+  certification: string;
+  releaseDate: Date;
+  about: string;
+  cast: { actor: string[]; actress: string[] };
+  crew: {
+    director: string[];
+    producer: string[];
+    executiveProducer: string[];
+    cinematographer: string[];
+    editor: string[];
+    writer: string[];
+    musician: string[];
+    screenplay: string[];
+  };
+}
+
+export interface IReqBodyWithId {
+  id: Types.ObjectId;
+}
+
+export interface IResBody {
+  status: ResStatus.Success;
   result?: number;
   token?: string;
   message?: string;
-  data?: Partial<IUserSchema>;
+  data?: ResData;
+}
+
+// Middleware interfaces
+export interface IReqWithUser extends Request {
+  user?: IUserSchema;
 }
 
 // Mail interface
@@ -48,4 +114,11 @@ export interface MailOptions {
   name?: string;
   link?: string;
   OTP?: number;
+}
+
+export interface IResError {
+  status: string;
+  message: string;
+  error?: AppError;
+  stack?: string;
 }

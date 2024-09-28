@@ -14,3 +14,8 @@ export const generateJwt = (
   secretKey: string,
   timeToExpire: string
 ) => jwt.sign({ id }, secretKey, { expiresIn: timeToExpire });
+
+export const verifyJwt = <T = jwt.JwtPayload>(
+  token: string,
+  secretKey: string
+): T => jwt.verify(token, secretKey) as T;
