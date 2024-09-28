@@ -4,7 +4,11 @@ import AppError from '../utils/AppError';
 import { IResError, ResStatus } from '../types';
 
 const mongoDuplicateErr = (err: any) => {
-  console.log(...err.error.errorResponse);
+  const message = `Duplicate ${Object.keys(err.errorResponse.keyPattern).join(
+    ', '
+  )} is not allowed`;
+
+  return new AppError(message, 404);
 };
 
 const mongoValidationErr = (err: AppError) => {
