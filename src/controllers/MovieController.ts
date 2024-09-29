@@ -84,18 +84,14 @@ class MovieController {
       const { id } = req.params;
       if (!id) return next(new AppError('Please provide id', 400));
 
-      const movie = await Movie.findOneAndUpdate(
-        { _id: id },
-        {/* FIXME:  */},
-        {
-          runValidators: true,
-          new: true
-        }
-      );
+      const movie = await Movie.findOneAndUpdate({ _id: id }, req.body, {
+        runValidators: true,
+        new: true
+      });
 
       if (!movie) return next(new AppError('No movie found', 404));
 
-      return res.status(200).json({
+      return res.status(201).json({
         status: ResStatus.Success,
         data: movie     
       });
