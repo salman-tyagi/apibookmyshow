@@ -52,9 +52,7 @@ export interface IMovieSchema {
   ratingsAverage: number;
   likes: number;
   genres: string[];
-  screen: string[];
   certification: string;
-  releaseDate: Date;
   about: string;
   cast: { actor: string[]; actress: string[] };
   crew: {
@@ -75,9 +73,7 @@ export interface IMovieReqBody {
   languages: string[];
   duration: number;
   genres: string[];
-  screen: string[];
   certification: string;
-  releaseDate: Date;
   about: string;
   cast: { actor: string[]; actress: string[] };
   crew: {
@@ -92,13 +88,12 @@ export interface IMovieReqBody {
   };
 }
 
-export interface ICinemaSchema {
-  name: string;
-  // screen: string[];
+export interface ITheatreSchema {
+  theatre: string;
   multiplexChain: MultiplexChain;
-  movies: string[];
   location: { lat: number; lng: number };
   address: string;
+  locality: string;
   city: string;
   state: string;
   pincode: number;
@@ -112,15 +107,29 @@ export interface ICinemaSchema {
     parking: boolean;
     foodCourt: boolean;
   };
+  seats: {
+    vip: {
+      row: number;
+      column: number;
+    };
+    executive: {
+      row: number;
+      column: number;
+    };
+    normal: {
+      row: number;
+      column: number;
+    };
+  };
+  createdAt: Date;
 }
 
-export interface ICinemaReqBody {
-  name: string;
-  // screen: string[];
+export interface ITheatreReqBody {
+  theatre: string;
   multiplexChain: MultiplexChain;
-  // movies: string[];
   location: { lat: number; lng: number };
   address: string;
+  locality: string;
   city: string;
   state: string;
   pincode: number;
@@ -133,6 +142,20 @@ export interface ICinemaReqBody {
     wheelChair: boolean;
     parking: boolean;
     foodCourt: boolean;
+  };
+  seats: {
+    vip: {
+      row: number;
+      column: number;
+    };
+    executive: {
+      row: number;
+      column: number;
+    };
+    normal: {
+      row: number;
+      column: number;
+    };
   };
 }
 

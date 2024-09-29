@@ -1,26 +1,12 @@
 import { NextFunction, Request, Response } from 'express';
 
 import Movie from '../models/movieModel';
-import {
-  get,
-  controller,
-  bodyValidator,
-  post,
-  use,
-  patch,
-  del
-} from './decorators';
+import { get, controller, bodyValidator, post, use, patch, del } from './decorators';
 import protect from '../middlewares/protect';
 import accessAllowedTo from '../middlewares/accessAllowedTo';
 import AppError from '../utils/AppError';
 
-import {
-  IMovieReqBody,
-  IMovieSchema,
-  IReqBodyWithId,
-  IResBody,
-  ResStatus
-} from '../types';
+import { IMovieReqBody, IMovieSchema, IReqBodyWithId, IResBody, ResStatus } from '../types';
 
 @controller('/movies')
 class MovieController {
@@ -44,18 +30,7 @@ class MovieController {
   }
 
   @post('/')
-  @bodyValidator(
-    'title',
-    'languages',
-    'duration',
-    'genres',
-    'screen',
-    'certification',
-    'releaseDate',
-    'about',
-    'cast',
-    'crew'
-  )
+  @bodyValidator('title', 'languages', 'duration', 'genres', 'certification', 'about', 'cast', 'crew')
   @use(protect)
   @use(accessAllowedTo('admin'))
   async createMovie(
@@ -96,8 +71,10 @@ class MovieController {
       next(err);
     }
   }
-
+ 
   @patch('/:id')
+  @use(protect)
+  @use(accessAllowedTo('admin'))
   async updateMovie(
     req: Request<IReqBodyWithId>,
     res: Response<IResBody>,
@@ -107,16 +84,20 @@ class MovieController {
       const { id } = req.params;
       if (!id) return next(new AppError('Please provide id', 400));
 
-      const movie = await Movie.findOneAndUpdate({ _id: id }, req.body, {
-        runValidators: true,
-        new: true
-      });
+      const movie = await Movie.findOneAndUpdate(
+        { _id: id },
+        {/* FIXME:  */},
+        {
+          runValidators: true,
+          new: true
+        }
+      );
 
       if (!movie) return next(new AppError('No movie found', 404));
 
       return res.status(200).json({
         status: ResStatus.Success,
-        data: movie
+        data: movie     
       });
     } catch (err) {
       next(err);

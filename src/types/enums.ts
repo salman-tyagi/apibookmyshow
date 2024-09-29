@@ -1,4 +1,4 @@
-import { IMovieSchema, IUserSchema, ICinemaSchema } from './interfaces';
+import { IMovieSchema, IUserSchema, ITheatreSchema } from './interfaces';
 
 export enum ResStatus {
   Success = 'success',
@@ -11,5 +11,5 @@ export type ResData =
   | IUserSchema[]
   | Partial<IMovieSchema>
   | IMovieSchema[]
-  | ICinemaSchema
-  | ICinemaSchema[];
+  | ITheatreSchema
+  | ITheatreSchema[];

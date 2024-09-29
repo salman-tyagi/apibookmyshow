@@ -1,27 +1,20 @@
 import mongoose from 'mongoose';
 
-import { ICinemaSchema } from '../types';
+import { ITheatreSchema } from '../types';
 
-const cinemaSchema = new mongoose.Schema<ICinemaSchema>({
-  name: {
+const theatreSchema = new mongoose.Schema<ITheatreSchema>({
+  theatre: {
     type: String,
-    required: [true, 'Please provide cinema screen'],
+    required: [true, 'Please provide theatre name'],
     unique: true,
     trim: true,
     minlength: [6, 'Name must be minimum 10 characters long'],
     maxlength: [40, 'Name must be less than 40 characters']
   },
-  // screen: {
-  //   type: [String],
-  //   required: [true, 'Please provide screen type']
-  // },
   multiplexChain: {
     type: String,
     enum: ['inox', 'pvr', 'cinepolis'],
-    required: [true, 'Please provide franchise name']
-  },
-  movies: {
-    type: [String]
+    required: [true, 'Please provide multiplex chain']
   },
   location: {
     lat: Number,
@@ -31,6 +24,13 @@ const cinemaSchema = new mongoose.Schema<ICinemaSchema>({
     type: String,
     trim: true,
     maxlength: [50, 'Max characters should be 50 or less']
+  },
+  locality: {
+    type: String,
+    required: [true, 'Please provide locality'],
+    trim: true,
+    minlength: [4, 'Length must be at least 4'],
+    maxlength: [20, 'Length must be at most 40']
   },
   city: {
     type: String,
@@ -76,9 +76,45 @@ const cinemaSchema = new mongoose.Schema<ICinemaSchema>({
     },
     required: [true, 'Please provide facilities'],
     _id: false
+  },
+  seats: {
+    vip: {
+      row: {
+        type: Number,
+        default: 0
+      },
+      column: {
+        type: Number,
+        default: 0
+      }
+    },
+    executive: {
+      row: {
+        type: Number,
+        default: 0
+      },
+      column: {
+        type: Number,
+        default: 0
+      }
+    },
+    normal: {
+      row: {
+        type: Number,
+        default: 0
+      },
+      column: {
+        type: Number,
+        default: 0
+      }
+    }
+  },
+  createdAt: {
+    type: Date,
+    default: Date.now()
   }
 });
 
-const Cinema = mongoose.model<ICinemaSchema>('Cinema', cinemaSchema);
+const Theatre = mongoose.model<ITheatreSchema>('Theatre', theatreSchema);
 
-export default Cinema;
+export default Theatre;

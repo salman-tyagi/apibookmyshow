@@ -1,29 +1,29 @@
 import { NextFunction, Request, Response } from 'express';
 
-import Cinema from '../models/cinemaModel';
+import Theatre from '../models/theatreModel';
 import { bodyValidator, controller, del, get, patch, post, use } from './decorators';
 import protect from '../middlewares/protect';
 import accessAllowedTo from '../middlewares/accessAllowedTo';
 import { Types } from 'mongoose';
 import AppError from '../utils/AppError';
 
-import { ICinemaReqBody, ICinemaSchema, IResBody, ResStatus } from '../types';
+import { ITheatreReqBody, ITheatreSchema, IResBody, ResStatus } from '../types';
 
-@controller('/cinemas')
-class CinemaController {
+@controller('/theatres')
+class TheatreController {
   @get('/')
-  async getAllCinemas(
+  async getAllTheatres(
     req: Request,
     res: Response<IResBody>,
     next: NextFunction
   ): Promise<any> {
     try {
-      const cinemas = await Cinema.find();
+      const theatres = await Theatre.find();
 
       return res.status(200).json({
         status: ResStatus.Success,
-        result: cinemas.length,
-        data: cinemas
+        result: theatres.length,
+        data: theatres
       });
     } catch (err) {
       next(err);
@@ -31,20 +31,20 @@ class CinemaController {
   }
 
   @post('/')
-  @bodyValidator('name', 'multiplexChain', 'location', 'address', 'city', 'state', 'pincode', 'region', 'country', 'facilities')
+  @bodyValidator('theatre', 'multiplexChain', 'location', 'address', 'locality', 'city', 'state', 'pincode', 'region', 'country', 'facilities', 'seats')
   @use(protect)
   @use(accessAllowedTo('admin'))
-  async createCinema(
-    req: Request<{}, {}, ICinemaReqBody>,
+  async createTheatre(
+    req: Request<{}, {}, ITheatreReqBody>,
     res: Response<IResBody>,
     next: NextFunction
   ): Promise<any> {
     try {
-      const cinema = await Cinema.create<ICinemaReqBody>(req.body);
+      const theatre = await Theatre.create<ITheatreReqBody>(req.body);
 
       return res.status(201).json({
         status: ResStatus.Success,
-        data: cinema
+        data: theatre
       });
     } catch (err) {
       next(err);
@@ -52,7 +52,7 @@ class CinemaController {
   }
 
   @get('/:id')
-  async getCinema(
+  async getTheatre(
     req: Request<{ id: Types.ObjectId }>, 
     res: Response<IResBody>, 
     next: NextFunction
@@ -61,12 +61,12 @@ class CinemaController {
       const { id } = req.params;
       if (!id) return next(new AppError('Please provide id', 400));
 
-      const cinema = await Cinema.findOne({ _id: id });
-      if (!cinema) return next(new AppError('Cinema not found', 404));
+      const theatre = await Theatre.findOne({ _id: id });
+      if (!theatre) return next(new AppError('Theatre not found', 404));
 
       return res.status(200).json({
         status: ResStatus.Success,
-        data: cinema
+        data: theatre
       });
     } catch(err) {
       next(err);
@@ -76,8 +76,8 @@ class CinemaController {
   @patch('/:id')
   @use(protect)
   @use(accessAllowedTo('admin'))
-  async updateCinema(
-    req: Request<{ id: Types.ObjectId }, {}, ICinemaSchema>, 
+  async updateTheatre(
+    req: Request<{ id: Types.ObjectId }, {}, ITheatreSchema>, 
     res: Response<IResBody>, 
     next: NextFunction
   ):Promise<any> {
@@ -88,17 +88,17 @@ class CinemaController {
       if (!Object.values(req.body).length)
         return next(new AppError('Please provide request body', 400));
 
-      const cinema = await Cinema.findOneAndUpdate(
+      const theatre = await Theatre.findOneAndUpdate(
         { _id: id },
         { $set: req.body },
         { runValidators: true, new: true }
       );
 
-      if (!cinema) return next(new AppError('Cinema not found', 404));
+      if (!theatre) return next(new AppError('Theatre not found', 404));
       
       return res.status(201).json({
         status: ResStatus.Success,
-        data: cinema
+        data: theatre
       });
     } catch(err) {
       next(err);
@@ -108,7 +108,7 @@ class CinemaController {
   @del('/:id')
   @use(protect)
   @use(accessAllowedTo('admin'))
-  async deleteCinema(
+  async deleteTheatre(
     req: Request<{ id: Types.ObjectId }>, 
     res: Response<IResBody>, 
     next: NextFunction
@@ -117,12 +117,12 @@ class CinemaController {
       const { id } = req.params;
       if (!id) return next(new AppError('Please provide id', 400));
 
-      const cinema = await Cinema.findOneAndDelete({ _id: id });
-      if (!cinema) return next(new AppError('No cinema found', 404));
+      const theatre = await Theatre.findOneAndDelete({ _id: id });
+      if (!theatre) return next(new AppError('No theatre found', 404));
 
       return res.status(204).json({
         status: ResStatus.Success,
-        message: 'Cinema deleted successfully'
+        message: 'Theatre deleted successfully'
       });
     } catch (err) {
       next(err);
@@ -130,4 +130,4 @@ class CinemaController {
   };
 }
 
-export default CinemaController;
+export default TheatreController;

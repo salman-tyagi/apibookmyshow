@@ -53,7 +53,6 @@ const movieSchema = new mongoose.Schema<IMovieSchema>({
     default: 1
   },
   genres: { type: [String], required: [true, 'Genre is required'] },
-  screen: { type: [String], required: [true, 'Must have a screen'] },
   certification: {
     type: String,
     required: [true, 'Please certification rating'],
@@ -61,7 +60,6 @@ const movieSchema = new mongoose.Schema<IMovieSchema>({
     minlength: [1, 'Min length required is 1'],
     maxlength: [2, 'Max length required is 2']
   },
-  releaseDate: { type: Date, required: [true, 'Release date is required'] },
   about: {
     type: String,
     required: [true, 'About is required'],

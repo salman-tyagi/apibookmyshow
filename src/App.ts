@@ -6,7 +6,7 @@ import helmet from 'helmet';
 import './controllers/AuthController';
 import './controllers/UserController';
 import './controllers/MovieController';
-import './controllers/CinemaController';
+import './controllers/TheatreController';
 
 import { router } from './controllers/decorators';
 
