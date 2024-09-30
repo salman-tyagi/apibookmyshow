@@ -15,13 +15,13 @@ const movieSchema = new mongoose.Schema<IMovieSchema>({
     type: String,
     trim: true,
     minlength: [6, 'Min length required is 6'],
-    maxlength: [30, 'Max length required is 30']
+    maxlength: [60, 'Max length required is 60']
   },
   poster: {
     type: String,
     trim: true,
     minlength: [6, 'Min length required is 6'],
-    maxlength: [30, 'Max length required is 30']
+    maxlength: [60, 'Max length required is 60']
   },
   languages: { type: [String], required: [true, 'language is required'] },
   duration: {
@@ -75,12 +75,16 @@ const movieSchema = new mongoose.Schema<IMovieSchema>({
   crew: {
     type: {
       director: [String],
+      actionDirector: [String],
       producer: [String],
+      creativeProducer: [String],
       executiveProducer: [String],
       cinematographer: [String],
       editor: [String],
       writer: [String],
       musician: [String],
+      singer: [String],
+      lyricist: [String],
       screenplay: [String]
     },
     required: [true, 'Must have a crew'],
