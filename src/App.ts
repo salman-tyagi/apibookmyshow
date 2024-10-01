@@ -8,6 +8,7 @@ import './controllers/UserController';
 import './controllers/MovieController';
 import './controllers/TheatreController';
 import './controllers/ReleaseController';
+import './controllers/BookingController';
 
 import { router } from './controllers/decorators';
 

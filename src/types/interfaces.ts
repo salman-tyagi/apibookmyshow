@@ -179,6 +179,25 @@ export interface IReleaseReqBody {
   timings: [Date];
 }
 
+export interface IBookingSchema {
+  movie: Types.ObjectId;
+  theatre: Types.ObjectId;
+  seats: string | string[];
+  price: number;
+  showDate: Date;
+  showTime: Date;
+  createdAt: Date;
+}
+
+export interface IBookingReqBody {
+  movie: Types.ObjectId;
+  theatre: Types.ObjectId;
+  seats: string | string[];
+  price: number;
+  showDate: Date;
+  showTime: Date;
+}
+
 export interface IReqBodyWithId {
   id: Types.ObjectId;
 }
