@@ -1,5 +1,4 @@
 import { NextFunction, Request, Response } from 'express';
-import { Types } from 'mongoose';
 
 import Release from '../models/releaseModel';
 import { bodyValidator, controller, del, get, patch, post, use } from './decorators';
@@ -7,7 +6,7 @@ import protect from '../middlewares/protect';
 import accessAllowedTo from '../middlewares/accessAllowedTo';
 import AppError from '../utils/AppError';
 
-import { IReleaseReqBody, IResBody, ResStatus } from '../types';
+import { IReleaseReqBody, IReqParamsWithId, IResBody, ResStatus } from '../types';
 
 @controller('/releases')
 class ReleaseController {
@@ -56,7 +55,7 @@ class ReleaseController {
 
   @get('/:id')
   async getRelease(
-    req: Request<{ id: Types.ObjectId }>,
+    req: Request<IReqParamsWithId>,
     res: Response<IResBody>,
     next: NextFunction
   ): Promise<any> {
@@ -78,7 +77,7 @@ class ReleaseController {
 
   @patch('/:id')
   async updateRelease(
-    req: Request<{ id: Types.ObjectId }>,
+    req: Request<IReqParamsWithId>,
     res: Response<IResBody>,
     next: NextFunction
   ): Promise<any> {
@@ -104,7 +103,7 @@ class ReleaseController {
 
   @del('/:id')
   async deleteRelease(
-    req: Request<{ id: Types.ObjectId }>,
+    req: Request<IReqParamsWithId>,
     res: Response<IResBody>,
     next: NextFunction
   ): Promise<any> {

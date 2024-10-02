@@ -9,6 +9,7 @@ import './controllers/MovieController';
 import './controllers/TheatreController';
 import './controllers/ReleaseController';
 import './controllers/BookingController';
+import './controllers/ReviewController';
 
 import { router } from './controllers/decorators';
 

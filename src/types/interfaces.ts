@@ -6,7 +6,6 @@ import AppError from '../utils/AppError';
 import { ResStatus } from './enums';
 import { Identity, MultiplexChain, Role } from './typeAlias';
 
-// Model interfaces
 export interface IUserSchema {
   _id: Types.ObjectId;
   firstName: string;
@@ -28,7 +27,6 @@ export interface IUserSchema {
   createdAt: Date;
 }
 
-// Controller interfaces
 export interface ISignupReqBody {
   email: string;
 }
@@ -198,8 +196,27 @@ export interface IBookingReqBody {
   showTime: Date;
 }
 
-export interface IReqBodyWithId {
+export interface IReviewSchema {
+  review: string;
+  rating: number;
+  movie: Types.ObjectId;
+  user: Types.ObjectId;
+  createdAt: Date;
+}
+
+export interface IReqParamsWithId {
   id: Types.ObjectId;
+}
+
+export interface IReviewReqBody {
+  review: string;
+  rating: number;
+}
+
+export interface ICreateReviewRequest extends Request { // FIXME:
+  params: IReqParamsWithId;
+  body: IReviewReqBody;
+  user: IUserSchema;
 }
 
 export interface IResBody {
@@ -211,12 +228,10 @@ export interface IResBody {
   data?: any;
 }
 
-// Middleware interfaces
 export interface IReqWithUser extends Request {
   user?: IUserSchema;
 }
 
-// Mail interface
 export interface MailOptions {
   email: string;
   name?: string;

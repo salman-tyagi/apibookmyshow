@@ -6,7 +6,7 @@ import AppError from '../utils/AppError';
 import protect from '../middlewares/protect';
 import accessAllowedTo from '../middlewares/accessAllowedTo';
 
-import { IReqBodyWithId, IResBody, ResStatus } from '../types';
+import { IReqParamsWithId, IResBody, ResStatus } from '../types';
 
 @controller('/users')
 class UserController {
@@ -33,7 +33,7 @@ class UserController {
 
   @get('/:id')
   async getUser(
-    req: Request<IReqBodyWithId>,
+    req: Request<IReqParamsWithId>,
     res: Response<IResBody>,
     next: NextFunction
   ): Promise<any> {
@@ -57,7 +57,7 @@ class UserController {
   @use(protect)
   @use(accessAllowedTo('admin'))
   async deleteUser(
-    req: Request<IReqBodyWithId>,
+    req: Request<IReqParamsWithId>,
     res: Response<IResBody>,
     next: NextFunction
   ): Promise<any> {

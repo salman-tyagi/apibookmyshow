@@ -4,10 +4,9 @@ import Theatre from '../models/theatreModel';
 import { bodyValidator, controller, del, get, patch, post, use } from './decorators';
 import protect from '../middlewares/protect';
 import accessAllowedTo from '../middlewares/accessAllowedTo';
-import { Types } from 'mongoose';
 import AppError from '../utils/AppError';
 
-import { ITheatreReqBody, ITheatreSchema, IResBody, ResStatus } from '../types';
+import { ITheatreReqBody, ITheatreSchema, IResBody, ResStatus, IReqParamsWithId } from '../types';
 
 @controller('/theatres')
 class TheatreController {
@@ -53,7 +52,7 @@ class TheatreController {
 
   @get('/:id')
   async getTheatre(
-    req: Request<{ id: Types.ObjectId }>, 
+    req: Request<IReqParamsWithId>, 
     res: Response<IResBody>, 
     next: NextFunction
   ): Promise<any> {
@@ -77,7 +76,7 @@ class TheatreController {
   @use(protect)
   @use(accessAllowedTo('admin'))
   async updateTheatre(
-    req: Request<{ id: Types.ObjectId }, {}, ITheatreSchema>, 
+    req: Request<IReqParamsWithId, {}, ITheatreSchema>, 
     res: Response<IResBody>, 
     next: NextFunction
   ):Promise<any> {
@@ -109,7 +108,7 @@ class TheatreController {
   @use(protect)
   @use(accessAllowedTo('admin'))
   async deleteTheatre(
-    req: Request<{ id: Types.ObjectId }>, 
+    req: Request<IReqParamsWithId>, 
     res: Response<IResBody>, 
     next: NextFunction
   ): Promise<any> {

@@ -1,5 +1,4 @@
 import { NextFunction, Request, Response } from 'express';
-import { Types } from 'mongoose';
 
 import Movie from '../models/movieModel';
 import { get, controller, bodyValidator, post, use, patch, del } from './decorators';
@@ -8,7 +7,7 @@ import accessAllowedTo from '../middlewares/accessAllowedTo';
 import AppError from '../utils/AppError';
 import upload from '../middlewares/multer';
 
-import { IMovieReqBody, IMovieSchema, IReqBodyWithId, IResBody, ResStatus } from '../types';
+import { IMovieReqBody, IReqParamsWithId, IResBody, ResStatus } from '../types';
 
 @controller('/movies')
 class MovieController {
@@ -41,7 +40,7 @@ class MovieController {
     next: NextFunction
   ): Promise<any> {
     try {
-      const movie = await Movie.create<Partial<IMovieSchema>>(req.body);
+      const movie = await Movie.create<IMovieReqBody>(req.body);
 
       return res.status(201).json({
         status: ResStatus.Success,
@@ -54,7 +53,7 @@ class MovieController {
 
   @get('/:id')
   async getMovie(
-    req: Request<{ id: Types.ObjectId }>,
+    req: Request<IReqParamsWithId>,
     res: Response<IResBody>,
     next: NextFunction
   ): Promise<any> {
@@ -84,7 +83,7 @@ class MovieController {
   @use(protect)
   @use(accessAllowedTo('admin'))
   async updateMovie(
-    req: Request<{ id: Types.ObjectId }>,
+    req: Request<IReqParamsWithId>,
     res: Response<IResBody>,
     next: NextFunction
   ): Promise<any> {
@@ -122,7 +121,7 @@ class MovieController {
 
   @del('/:id')
   async deleteMovie(
-    req: Request<IReqBodyWithId>,
+    req: Request<IReqParamsWithId>,
     res: Response<IResBody>,
     next: NextFunction
   ): Promise<any> {
