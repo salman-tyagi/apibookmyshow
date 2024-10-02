@@ -214,7 +214,7 @@ export interface IReviewReqBody {
 }
 
 export interface ICreateReviewRequest extends Request { // FIXME:
-  params: IReqParamsWithId;
+  params: { id: string };
   body: IReviewReqBody;
   user: IUserSchema;
 }

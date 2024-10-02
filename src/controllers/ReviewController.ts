@@ -1,4 +1,5 @@
 import { Request, Response, NextFunction } from 'express';
+import { Types } from 'mongoose';
 
 import Review from '../models/ReviewModel';
 import AppError from '../utils/AppError';
@@ -50,7 +51,7 @@ class ReviewController {
       const review = await Review.create<IReviewReqBody>({
         review: movieReview,
         rating,
-        movie: id,
+        movie: new Types.ObjectId(id),
         user: req.user._id
       });
 
