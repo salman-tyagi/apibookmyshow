@@ -1,29 +1,31 @@
 import { NextFunction, Request, Response } from 'express';
 
-import Movie from '../models/movieModel';
-import { get, controller, bodyValidator, post, use, patch, del } from './decorators';
+import Release from '../models/releaseModel';
+import { bodyValidator, controller, del, get, patch, post, use } from './decorators';
 import protect from '../middlewares/protect';
 import accessAllowedTo from '../middlewares/accessAllowedTo';
 import AppError from '../utils/AppError';
-import upload from '../middlewares/multer';
 
-import { IMovieReqBody, IReqParamsWithId, IResBody, ResStatus } from '../types';
+import { IReleaseReqBody, IReqParamsWithId, IResBody, ResStatus } from '../types';
 
-@controller('/movies')
-class MovieController {
+@controller('/releases')
+class ReleaseController {
   @get('/')
-  async getAllMovies(
+  async getAllReleases(
     req: Request,
     res: Response<IResBody>,
     next: NextFunction
   ): Promise<any> {
     try {
-      const movies = await Movie.find();
+      const releases = await Release.find().populate({
+        path: 'movie theatres',
+        select: 'title theatre'
+      });
 
       return res.status(200).json({
         status: ResStatus.Success,
-        result: movies.length,
-        data: movies
+        result: releases.length,
+        data: releases
       });
     } catch (err) {
       next(err);
@@ -31,20 +33,20 @@ class MovieController {
   }
 
   @post('/')
-  @bodyValidator('title', 'languages', 'duration', 'genres', 'certification', 'about', 'cast', 'crew')
+  @bodyValidator('movie', 'theatres', 'releaseDate', 'timings')
   @use(protect)
   @use(accessAllowedTo('admin'))
-  async createMovie(
-    req: Request<{}, {}, IMovieReqBody>,
+  async createRelease(
+    req: Request<{}, {}, IReleaseReqBody>,
     res: Response<IResBody>,
     next: NextFunction
   ): Promise<any> {
     try {
-      const movie = await Movie.create<IMovieReqBody>(req.body);
+      const release = await Release.create<IReleaseReqBody>(req.body);
 
       return res.status(201).json({
         status: ResStatus.Success,
-        data: movie
+        data: release
       });
     } catch (err) {
       next(err);
@@ -52,7 +54,7 @@ class MovieController {
   }
 
   @get('/:id')
-  async getMovie(
+  async getRelease(
     req: Request<IReqParamsWithId>,
     res: Response<IResBody>,
     next: NextFunction
@@ -61,12 +63,12 @@ class MovieController {
       const { id } = req.params;
       if (!id) return next(new AppError('Please provide id', 400));
 
-      const movie = await Movie.findOne({ _id: id });
-      if (!movie) return next(new AppError('No movie found', 404));
+      const release = await Release.findOne({ _id: id });
+      if (!release) return next(new AppError('No release found', 404));
 
       return res.status(200).json({
         status: ResStatus.Success,
-        data: movie
+        data: release
       });
     } catch (err) {
       next(err);
@@ -74,15 +76,7 @@ class MovieController {
   }
 
   @patch('/:id')
-  @use(
-    upload.fields([
-      { name: 'image', maxCount: 1 },
-      { name: 'poster', maxCount: 1 }
-    ])
-  )
-  @use(protect)
-  @use(accessAllowedTo('admin'))
-  async updateMovie(
+  async updateRelease(
     req: Request<IReqParamsWithId>,
     res: Response<IResBody>,
     next: NextFunction
@@ -90,29 +84,17 @@ class MovieController {
     try {
       const { id } = req.params;
       if (!id) return next(new AppError('Please provide id', 400));
-      
-      const { body } = req;
-      
-      if (req.files && Object.keys(req.files).length) {
-        const files = req.files as { [fieldname: string]: Express.Multer.File[] };
-        
-        const image = files.image?.at(0)?.filename;
-        body.image = image;
 
-        const poster = files.poster?.at(0)?.filename;
-        body.poster = poster;
-      }
-
-      const movie = await Movie.findOneAndUpdate({ _id: id }, body, {
+      const release = await Release.findOneAndUpdate({ _id: id }, req.body, {
         runValidators: true,
         new: true
       });
 
-      if (!movie) return next(new AppError('No movie found', 404));
+      if (!release) return next(new AppError('No release found', 404));
 
       return res.status(201).json({
         status: ResStatus.Success,
-        data: movie
+        data: release
       });
     } catch (err) {
       next(err);
@@ -120,7 +102,7 @@ class MovieController {
   }
 
   @del('/:id')
-  async deleteMovie(
+  async deleteRelease(
     req: Request<IReqParamsWithId>,
     res: Response<IResBody>,
     next: NextFunction
@@ -129,8 +111,8 @@ class MovieController {
       const { id } = req.params;
       if (!id) return next(new AppError('Please provide id', 400));
 
-      const movie = await Movie.findOneAndDelete({ _id: id });
-      if (!movie) return next(new AppError('No movie found', 404));
+      const release = await Release.findOneAndDelete({ _id: id });
+      if (!release) return next(new AppError('No release found', 404));
 
       return res.status(204).json({
         status: ResStatus.Success
@@ -141,4 +123,4 @@ class MovieController {
   }
 }
 
-export default MovieController;
+export default ReleaseController;

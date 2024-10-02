@@ -3,12 +3,9 @@ import { Request } from 'express';
 
 import AppError from '../utils/AppError';
 
-import { ResData, ResStatus } from './enums';
+import { ResStatus } from './enums';
+import { Identity, MultiplexChain, Role } from './typeAlias';
 
-type Role = 'admin' | 'user';
-type Identity = 'man' | 'woman';
-
-// Model interfaces
 export interface IUserSchema {
   _id: Types.ObjectId;
   firstName: string;
@@ -30,7 +27,6 @@ export interface IUserSchema {
   createdAt: Date;
 }
 
-// Controller interfaces
 export interface ISignupReqBody {
   email: string;
 }
@@ -51,19 +47,21 @@ export interface IMovieSchema {
   ratingsAverage: number;
   likes: number;
   genres: string[];
-  screen: string[];
   certification: string;
-  releaseDate: Date;
   about: string;
   cast: { actor: string[]; actress: string[] };
   crew: {
     director: string[];
+    actionDirector: string[];
     producer: string[];
+    creativeProducer: string[];
     executiveProducer: string[];
     cinematographer: string[];
     editor: string[];
     writer: string[];
     musician: string[];
+    singer: string[];
+    lyricist: string[];
     screenplay: string[];
   };
   createdAt: Date;
@@ -74,25 +72,151 @@ export interface IMovieReqBody {
   languages: string[];
   duration: number;
   genres: string[];
-  screen: string[];
   certification: string;
-  releaseDate: Date;
   about: string;
   cast: { actor: string[]; actress: string[] };
   crew: {
     director: string[];
+    actionDirector: string[];
     producer: string[];
+    creativeProducer: string[];
     executiveProducer: string[];
     cinematographer: string[];
     editor: string[];
     writer: string[];
     musician: string[];
+    singer: string[];
+    lyricist: string[];
     screenplay: string[];
   };
 }
 
-export interface IReqBodyWithId {
+export interface ITheatreSchema {
+  theatre: string;
+  multiplexChain: MultiplexChain;
+  location: { lat: number; lng: number };
+  address: string;
+  locality: string;
+  city: string;
+  state: string;
+  pincode: number;
+  region: string;
+  country: string;
+  facilities: {
+    ticketCancellation: boolean;
+    foodAndBeverages: boolean;
+    mTicket: boolean;
+    wheelChair: boolean;
+    parking: boolean;
+    foodCourt: boolean;
+  };
+  seats: {
+    vip: {
+      row: number;
+      column: number;
+    };
+    executive: {
+      row: number;
+      column: number;
+    };
+    normal: {
+      row: number;
+      column: number;
+    };
+  };
+  createdAt: Date;
+}
+
+export interface ITheatreReqBody {
+  theatre: string;
+  multiplexChain: MultiplexChain;
+  location: { lat: number; lng: number };
+  address: string;
+  locality: string;
+  city: string;
+  state: string;
+  pincode: number;
+  region: string;
+  country: string;
+  facilities: {
+    ticketCancellation: boolean;
+    foodAndBeverages: boolean;
+    mTicket: boolean;
+    wheelChair: boolean;
+    parking: boolean;
+    foodCourt: boolean;
+  };
+  seats: {
+    vip: {
+      row: number;
+      column: number;
+    };
+    executive: {
+      row: number;
+      column: number;
+    };
+    normal: {
+      row: number;
+      column: number;
+    };
+  };
+}
+
+export interface IReleaseSchema {
+  movie: Types.ObjectId;
+  theatres: Types.ObjectId;
+  releaseDate: Date;
+  timings: [Date];
+  createdAt: Date;
+}
+
+export interface IReleaseReqBody {
+  movie: Types.ObjectId;
+  theatres: Types.ObjectId;
+  releaseDate: Date;
+  timings: [Date];
+}
+
+export interface IBookingSchema {
+  movie: Types.ObjectId;
+  theatre: Types.ObjectId;
+  seats: string | string[];
+  price: number;
+  showDate: Date;
+  showTime: Date;
+  createdAt: Date;
+}
+
+export interface IBookingReqBody {
+  movie: Types.ObjectId;
+  theatre: Types.ObjectId;
+  seats: string | string[];
+  price: number;
+  showDate: Date;
+  showTime: Date;
+}
+
+export interface IReviewSchema {
+  review: string;
+  rating: number;
+  movie: Types.ObjectId;
+  user: Types.ObjectId;
+  createdAt: Date;
+}
+
+export interface IReqParamsWithId {
   id: Types.ObjectId;
+}
+
+export interface IReviewReqBody {
+  review: string;
+  rating: number;
+}
+
+export interface ICreateReviewRequest extends Request { // FIXME:
+  params: IReqParamsWithId;
+  body: IReviewReqBody;
+  user: IUserSchema;
 }
 
 export interface IResBody {
@@ -100,15 +224,14 @@ export interface IResBody {
   result?: number;
   token?: string;
   message?: string;
-  data?: ResData;
+  // data?: ResData;
+  data?: any;
 }
 
-// Middleware interfaces
 export interface IReqWithUser extends Request {
   user?: IUserSchema;
 }
 
-// Mail interface
 export interface MailOptions {
   email: string;
   name?: string;

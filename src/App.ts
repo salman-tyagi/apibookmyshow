@@ -6,6 +6,10 @@ import helmet from 'helmet';
 import './controllers/AuthController';
 import './controllers/UserController';
 import './controllers/MovieController';
+import './controllers/TheatreController';
+import './controllers/ReleaseController';
+import './controllers/BookingController';
+import './controllers/ReviewController';
 
 import { router } from './controllers/decorators';
 

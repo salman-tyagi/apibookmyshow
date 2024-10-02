@@ -123,7 +123,7 @@ class AuthController {
   ): Promise<any> {
     try {
       const user = await User.findOneAndUpdate(
-        { _id: req.user!._id },
+        { _id: req.user?._id },
         { $set: { active: false, verified: false } }
       );
 

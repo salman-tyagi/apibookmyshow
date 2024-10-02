@@ -3,6 +3,11 @@ import { Request, Response, NextFunction } from 'express';
 import AppError from '../utils/AppError';
 import { IResError, ResStatus } from '../types';
 
+const mongoInvalidIdErr = (err: any) => {
+  const message = `Invalid ${err.path}: ${err.value}`;
+  return new AppError(message, 400);
+};
+
 const mongoDuplicateErr = (err: any) => {
   const message = `Duplicate ${Object.keys(err.errorResponse.keyPattern).join(
     ', '
@@ -69,6 +74,7 @@ const globalErrorMiddleware = (
 
     if (error.name === 'ValidationError') error = mongoValidationErr(err);
     if (error.code === 11000) error = mongoDuplicateErr(err);
+    if (error.name === 'CastError') error = mongoInvalidIdErr(err);
     if (error.name === 'JsonWebTokenError') error = jwtInvalidTokenErr();
     if (error.name === 'TokenExpiredError') error = jwtTokenExpiredErr();
 
