@@ -42,10 +42,9 @@ export interface IMovieSchema {
   poster: string;
   languages: string[];
   duration: number; // in mins
-  review: string;
   ratingsQuantity: number;
   ratingsAverage: number;
-  likes: number;
+  votes: number;
   genres: string[];
   certification: string;
   about: string;

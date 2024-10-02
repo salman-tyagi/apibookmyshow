@@ -1,7 +1,7 @@
 import { Request, Response, NextFunction } from 'express';
 import { Types } from 'mongoose';
 
-import Review from '../models/ReviewModel';
+import Review from '../models/reviewModel';
 import AppError from '../utils/AppError';
 import { bodyValidator, controller, del, get, patch, post, use } from './decorators';
 import protect from '../middlewares/protect';

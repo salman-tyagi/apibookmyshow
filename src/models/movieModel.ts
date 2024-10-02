@@ -31,16 +31,9 @@ const movieSchema = new mongoose.Schema<IMovieSchema>({
     minlength: [6, 'Min length required is 6'],
     maxlength: [30, 'Max length required is 30']
   },
-  review: {
-    type: String,
-    trim: true,
-    default: 'Good movie',
-    minlength: [6, 'Min length required is 6'],
-    maxlength: [30, 'Max length required is 30']
-  },
   ratingsQuantity: {
     type: Number,
-    default: 1,
+    default: 0,
     min: 1,
     max: 10
   },
@@ -48,7 +41,7 @@ const movieSchema = new mongoose.Schema<IMovieSchema>({
     type: Number,
     default: 0
   },
-  likes: {
+  votes: {
     type: Number,
     default: 1
   },
