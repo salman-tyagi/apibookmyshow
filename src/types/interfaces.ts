@@ -42,10 +42,9 @@ export interface IMovieSchema {
   poster: string;
   languages: string[];
   duration: number; // in mins
-  review: string;
   ratingsQuantity: number;
   ratingsAverage: number;
-  likes: number;
+  votes: number;
   genres: string[];
   certification: string;
   about: string;
@@ -214,7 +213,7 @@ export interface IReviewReqBody {
 }
 
 export interface ICreateReviewRequest extends Request { // FIXME:
-  params: IReqParamsWithId;
+  params: { id: string };
   body: IReviewReqBody;
   user: IUserSchema;
 }
