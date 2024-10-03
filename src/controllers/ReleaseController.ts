@@ -5,6 +5,7 @@ import { bodyValidator, controller, del, get, patch, post, use } from './decorat
 import protect from '../middlewares/protect';
 import accessAllowedTo from '../middlewares/accessAllowedTo';
 import AppError from '../utils/AppError';
+import ApiFeatures from '../utils/ApiFeatures';
 
 import { IReleaseReqBody, IReqParamsWithId, IResBody, ResStatus } from '../types';
 
@@ -17,7 +18,13 @@ class ReleaseController {
     next: NextFunction
   ): Promise<any> {
     try {
-      const releases = await Release.find().populate({
+      const apiFeatures = new ApiFeatures(Release.find(), req.query)
+        .filter()
+        .sort()
+        .projection()
+        .pagination();
+
+      const releases = await apiFeatures.query.populate({
         path: 'movie theatres',
         select: 'title theatre'
       });

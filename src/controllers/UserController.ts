@@ -5,6 +5,7 @@ import { get, controller, del, use } from './decorators';
 import AppError from '../utils/AppError';
 import protect from '../middlewares/protect';
 import accessAllowedTo from '../middlewares/accessAllowedTo';
+import ApiFeatures from '../utils/ApiFeatures';
 
 import { IReqParamsWithId, IResBody, ResStatus } from '../types';
 
@@ -19,7 +20,13 @@ class UserController {
     next: NextFunction
   ): Promise<any> {
     try {
-      const users = await User.find();
+      const apiFeatures = new ApiFeatures(User.find(), req.query)
+        .filter()
+        .sort()
+        .projection()
+        .pagination();
+
+      const users = await apiFeatures.query;
 
       return res.status(200).json({
         status: ResStatus.Success,
@@ -32,6 +39,8 @@ class UserController {
   }
 
   @get('/:id')
+  @use(protect)
+  @use(accessAllowedTo('admin'))
   async getUser(
     req: Request<IReqParamsWithId>,
     res: Response<IResBody>,

@@ -1,4 +1,5 @@
 import { NextFunction, Request, Response } from 'express';
+import { Types } from 'mongoose';
 
 import Movie from '../models/movieModel';
 import { get, controller, bodyValidator, post, use, patch, del } from './decorators';
@@ -6,6 +7,7 @@ import protect from '../middlewares/protect';
 import accessAllowedTo from '../middlewares/accessAllowedTo';
 import AppError from '../utils/AppError';
 import upload from '../middlewares/multer';
+import ApiFeatures from '../utils/ApiFeatures';
 
 import { IMovieReqBody, IReqParamsWithId, IResBody, ResStatus } from '../types';
 
@@ -18,7 +20,13 @@ class MovieController {
     next: NextFunction
   ): Promise<any> {
     try {
-      const movies = await Movie.find();
+      const apiFeatures = new ApiFeatures(Movie.find(), req.query)
+        .filter()
+        .sort()
+        .projection()
+        .pagination();
+
+      const movies = await apiFeatures.query;
 
       return res.status(200).json({
         status: ResStatus.Success,
@@ -137,6 +145,56 @@ class MovieController {
       });
     } catch (err) {
       next(err);
+    }
+  }
+
+  @get('/:id/reviews')
+  async getMovieReviews(
+    req: Request<IReqParamsWithId>, 
+    res: Response<IResBody>, 
+    next: NextFunction
+  ): Promise<any> {
+    try {
+      const { id } = req.params;
+      if (!id) return next(new AppError('Please provide movie id', 400));
+
+      const reviews = await Movie.aggregate(
+        [
+          {
+            $match: { _id: new Types.ObjectId(id) }
+          },
+          {
+            $lookup: {
+              from: 'reviews',
+              localField: '_id',
+              foreignField: 'movie',
+              as: 'reviews'
+            }
+          },
+          {
+            $project: {
+              reviews: 1
+            }
+          },
+          // {
+          //   $sort: { createdAt: -1 }
+          // }
+          // {
+          //   $group: {
+          //     _id: '',
+          //   }
+          // }
+        ],
+        {}
+      );
+
+      return res.status(200).json({
+        status: ResStatus.Success,
+        result: reviews.length,
+        data: reviews
+      });
+    } catch (err) {
+      next(err);      
     }
   }
 }
