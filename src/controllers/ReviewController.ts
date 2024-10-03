@@ -6,6 +6,7 @@ import AppError from '../utils/AppError';
 import { bodyValidator, controller, del, get, patch, post, use } from './decorators';
 import protect from '../middlewares/protect';
 import accessAllowedTo from '../middlewares/accessAllowedTo';
+import ApiFeatures from '../utils/ApiFeatures';
 
 import { IReqParamsWithId, IResBody, ICreateReviewRequest, ResStatus, IReviewReqBody } from '../types';
 
@@ -18,7 +19,13 @@ class ReviewController {
     next: NextFunction
   ): Promise<any> {
     try {
-      const reviews = await Review.find().populate({
+      const apiFeatures = new ApiFeatures(Review.find(), req.query)
+        .filter()
+        .sort()
+        .projection()
+        .pagination();
+
+      const reviews = await apiFeatures.query.populate({
         path: 'movie user',
         select: 'title name email'
       });

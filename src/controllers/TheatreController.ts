@@ -5,6 +5,7 @@ import { bodyValidator, controller, del, get, patch, post, use } from './decorat
 import protect from '../middlewares/protect';
 import accessAllowedTo from '../middlewares/accessAllowedTo';
 import AppError from '../utils/AppError';
+import ApiFeatures from '../utils/ApiFeatures';
 
 import { ITheatreReqBody, ITheatreSchema, IResBody, ResStatus, IReqParamsWithId } from '../types';
 
@@ -17,7 +18,13 @@ class TheatreController {
     next: NextFunction
   ): Promise<any> {
     try {
-      const theatres = await Theatre.find();
+      const apiFeatures = new ApiFeatures(Theatre.find(), req.query)
+        .filter()
+        .sort()
+        .projection()
+        .pagination();
+
+      const theatres = await apiFeatures.query;
 
       return res.status(200).json({
         status: ResStatus.Success,

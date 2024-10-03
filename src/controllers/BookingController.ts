@@ -5,6 +5,7 @@ import { bodyValidator, controller, get, post, use } from './decorators';
 import protect from '../middlewares/protect';
 import accessAllowedTo from '../middlewares/accessAllowedTo';
 import AppError from '../utils/AppError';
+import ApiFeatures from '../utils/ApiFeatures';
 
 import { IResBody, ResStatus, IBookingReqBody, IReqParamsWithId } from '../types';
 
@@ -19,7 +20,13 @@ class BookingController {
     next: NextFunction
   ): Promise<any> {
     try {
-      const bookings = await Booking.find();
+      const apiFeatures = new ApiFeatures(Booking.find(), req.query)
+        .filter()
+        .sort()
+        .projection()
+        .pagination();
+
+      const bookings = await apiFeatures.query;
 
       return res.status(200).json({
         status: ResStatus.Success,
