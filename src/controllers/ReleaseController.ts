@@ -24,10 +24,7 @@ class ReleaseController {
         .projection()
         .pagination();
 
-      const releases = await apiFeatures.query.populate({
-        path: 'movie theatres',
-        select: 'title theatre'
-      });
+      const releases = await apiFeatures.query;
 
       return res.status(200).json({
         status: ResStatus.Success,
@@ -40,7 +37,7 @@ class ReleaseController {
   }
 
   @post('/')
-  @bodyValidator('movie', 'theatres', 'releaseDate', 'timings')
+  @bodyValidator('movie', 'theatre', 'releaseDate', 'screen', 'movieDateAndTime')
   @use(protect)
   @use(accessAllowedTo('admin'))
   async createRelease(
@@ -49,7 +46,16 @@ class ReleaseController {
     next: NextFunction
   ): Promise<any> {
     try {
-      const release = await Release.create<IReleaseReqBody>(req.body);
+      const { movie, theatre, releaseDate, screen, movieDateAndTime } =
+        req.body;
+
+      const release = await Release.create<IReleaseReqBody>({
+        movie,
+        theatre,
+        releaseDate,
+        screen,
+        movieDateAndTime
+      });
 
       return res.status(201).json({
         status: ResStatus.Success,
@@ -70,7 +76,11 @@ class ReleaseController {
       const { id } = req.params;
       if (!id) return next(new AppError('Please provide id', 400));
 
-      const release = await Release.findOne({ _id: id });
+      const release = await Release.findOne({ _id: id }).populate({
+        path: 'movie theatre',
+        select: 'title theatre locality'
+      });
+
       if (!release) return next(new AppError('No release found', 404));
 
       return res.status(200).json({
@@ -84,7 +94,7 @@ class ReleaseController {
 
   @patch('/:id')
   async updateRelease(
-    req: Request<IReqParamsWithId>,
+    req: Request<IReqParamsWithId, {}, IReleaseReqBody>,
     res: Response<IResBody>,
     next: NextFunction
   ): Promise<any> {
@@ -92,10 +102,23 @@ class ReleaseController {
       const { id } = req.params;
       if (!id) return next(new AppError('Please provide id', 400));
 
-      const release = await Release.findOneAndUpdate({ _id: id }, req.body, {
-        runValidators: true,
-        new: true
-      });
+      const { movie, theatre, releaseDate, screen, movieDateAndTime } =
+        req.body;
+        
+
+      if (!movie && !theatre && !releaseDate && !screen && !movieDateAndTime)
+        return next(
+          new AppError(
+            'Please provide movie, theatre, releaseDate, screen and movieDateAndTime',
+            400
+          )
+        );
+
+      const release = await Release.findOneAndUpdate(
+        { _id: { $eq: id } },
+        { $set: { movie, theatre, releaseDate, screen, movieDateAndTime } },
+        { runValidators: true, new: true }
+      );
 
       if (!release) return next(new AppError('No release found', 404));
 
