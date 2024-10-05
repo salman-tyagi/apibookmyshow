@@ -150,43 +150,57 @@ class MovieController {
 
   @get('/:id/reviews')
   async getMovieReviews(
-    req: Request<IReqParamsWithId>, 
-    res: Response<IResBody>, 
+    req: Request<IReqParamsWithId>,
+    res: Response<IResBody>,
     next: NextFunction
   ): Promise<any> {
     try {
       const { id } = req.params;
       if (!id) return next(new AppError('Please provide movie id', 400));
 
-      const reviews = await Movie.aggregate(
-        [
-          {
-            $match: { _id: new Types.ObjectId(id) }
-          },
-          {
-            $lookup: {
-              from: 'reviews',
-              localField: '_id',
-              foreignField: 'movie',
-              as: 'reviews'
-            }
-          },
-          {
-            $project: {
-              reviews: 1
-            }
-          },
-          // {
-          //   $sort: { createdAt: -1 }
-          // }
-          // {
-          //   $group: {
-          //     _id: '',
-          //   }
-          // }
-        ],
-        {}
-      );
+      const reviews = await Movie.aggregate([
+        {
+          $match: {
+            _id: new Types.ObjectId(id)
+          }
+        },
+        {
+          $lookup: {
+            from: 'reviews',
+            localField: '_id',
+            foreignField: 'movie',
+            as: 'review'
+          }
+        },
+        {
+          $project: { review: 1 }
+        },
+        {
+          $unwind: '$review'
+        },
+        {
+          $lookup: {
+            from: 'users',
+            localField: 'review.user',
+            foreignField: '_id',
+            as: 'user'
+          }
+        },
+        {
+          $unwind: '$user'
+        },
+        {
+          $addFields: {
+            review: '$review.review',
+            rating: '$review.rating',
+            username: '$user.username',
+            email: '$user.email'
+          }
+        },
+        {
+          $project: { user: 0 }
+        }
+      ]);
 
       return res.status(200).json({
         status: ResStatus.Success,
@@ -194,7 +208,7 @@ class MovieController {
         data: reviews
       });
     } catch (err) {
-      next(err);      
+      next(err);
     }
   }
 }
