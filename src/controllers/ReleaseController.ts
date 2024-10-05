@@ -24,10 +24,7 @@ class ReleaseController {
         .projection()
         .pagination();
 
-      const releases = await apiFeatures.query.populate({
-        path: 'movie theatres',
-        select: 'title theatre'
-      });
+      const releases = await apiFeatures.query;
 
       return res.status(200).json({
         status: ResStatus.Success,
@@ -40,7 +37,7 @@ class ReleaseController {
   }
 
   @post('/')
-  @bodyValidator('movie', 'theatres', 'releaseDate', 'timings')
+  @bodyValidator('movie', 'theatre', 'releaseDate', 'screen', 'movieDateAndTime')
   @use(protect)
   @use(accessAllowedTo('admin'))
   async createRelease(
@@ -49,7 +46,16 @@ class ReleaseController {
     next: NextFunction
   ): Promise<any> {
     try {
-      const release = await Release.create<IReleaseReqBody>(req.body);
+      const { movie, theatre, releaseDate, screen, movieDateAndTime } =
+        req.body;
+
+      const release = await Release.create<IReleaseReqBody>({
+        movie,
+        theatre,
+        releaseDate,
+        screen,
+        movieDateAndTime
+      });
 
       return res.status(201).json({
         status: ResStatus.Success,

@@ -71,10 +71,7 @@ class BookingController {
       const { id } = req.params;
       if (!id) return next(new AppError('Please provide id', 400));
 
-      const booking = await Booking.findOne({ _id: id }).populate({
-        path: 'movie theatre',
-        select: 'title theatre address locality city state pincode'
-      });
+      const booking = await Booking.findOne({ _id: id });
       if (!booking) return next(new AppError('No booking found', 404));
 
       return res.status(200).json({

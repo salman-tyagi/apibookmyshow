@@ -4,7 +4,7 @@ import { Request } from 'express';
 import AppError from '../utils/AppError';
 
 import { ResStatus } from './enums';
-import { Identity, MultiplexChain, Role, Seat } from './typeAlias';
+import { Identity, MultiplexChain, Role, Screen, Seat } from './typeAlias';
 
 export interface IUserSchema {
   _id: Types.ObjectId;
@@ -145,17 +145,19 @@ export interface ITheatreReqBody {
 
 export interface IReleaseSchema {
   movie: Types.ObjectId;
-  theatres: Types.ObjectId;
+  theatre: Types.ObjectId;
   releaseDate: Date;
-  timings: [Date];
+  screen: Screen[];
+  movieDateAndTime: Date[];
   createdAt: Date;
 }
 
 export interface IReleaseReqBody {
   movie: Types.ObjectId;
-  theatres: Types.ObjectId;
+  theatre: Types.ObjectId;
   releaseDate: Date;
-  timings: [Date];
+  screen: Screen[];
+  movieDateAndTime: Date[];
 }
 
 export interface IBookingSchema {
