@@ -7,7 +7,7 @@ import accessAllowedTo from '../middlewares/accessAllowedTo';
 import AppError from '../utils/AppError';
 import ApiFeatures from '../utils/ApiFeatures';
 
-import { IResBody, ResStatus, IBookingReqBody, IReqParamsWithId } from '../types';
+import { IResBody, ResStatus, IBookingReqBody, IReqParamsWithId, IBookingRequest } from '../types';
 
 @controller('/bookings')
 class BookingController {
@@ -39,16 +39,27 @@ class BookingController {
   }
 
   @post('/')
-  @bodyValidator('movie', 'theatre', 'seatType', 'seats', 'ticketPrice', 'showDate', 'showTime')
+  @bodyValidator('movie', 'theatre', 'seatType', 'seats', 'movieDateAndTime', 'ticketPrice')
   @use(protect)
   @use(accessAllowedTo('user'))
   async createBooking(
-    req: Request<{}, {}, IBookingReqBody>,
+    req: IBookingRequest,
     res: Response<IResBody>,
     next: NextFunction
   ): Promise<any> {
     try {
-      const booking = await Booking.create<IBookingReqBody>(req.body);
+      const { movie, theatre, seatType, seats, movieDateAndTime, ticketPrice } =
+        req.body;
+
+      const booking = await Booking.create<IBookingReqBody>({
+        movie,
+        theatre,
+        user: req.user._id,
+        seatType,
+        seats,
+        movieDateAndTime,
+        ticketPrice
+      });
 
       return res.status(201).json({
         status: ResStatus.Success,

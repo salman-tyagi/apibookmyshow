@@ -24,7 +24,10 @@ class ReleaseController {
         .projection()
         .pagination();
 
-      const releases = await apiFeatures.query;
+      const releases = await apiFeatures.query.populate({
+        path: 'movie theatre',
+        select: 'title theatre locality'
+      })
 
       return res.status(200).json({
         status: ResStatus.Success,
