@@ -23,7 +23,7 @@ const theatreSchema = new mongoose.Schema<ITheatreSchema>({
   address: {
     type: String,
     trim: true,
-    maxlength: [100, 'Max characters should be 100 or less']
+    maxlength: [120, 'Max characters should be 120 or less']
   },
   locality: {
     type: String,

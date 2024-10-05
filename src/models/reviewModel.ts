@@ -32,6 +32,8 @@ const reviewSchema = new mongoose.Schema<IReviewSchema>({
   }
 });
 
+reviewSchema.index({ movie: 1, user: 1 }, { unique: true });
+
 const Review = mongoose.model<IReviewSchema>('Review', reviewSchema);
 
 export default Review;
