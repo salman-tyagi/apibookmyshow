@@ -196,7 +196,7 @@ export interface IReviewReqBody {
   rating: number;
 }
 
-export interface ICreateReviewRequest extends Request {
+export interface IReviewRequest extends Request { // Using with delete review
   params: { id: string };
   body: IReviewReqBody;
   user: IUserSchema;
@@ -227,4 +227,9 @@ export interface IResError {
   message: string;
   error?: AppError;
   stack?: string;
+}
+
+export interface IMovieReviewStats {
+  numReviews: number;
+  avgReviews: number;
 }
