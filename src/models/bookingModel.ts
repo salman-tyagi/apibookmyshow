@@ -16,6 +16,11 @@ const bookingSchema = new mongoose.Schema<IBookingSchema>(
       required: [true, 'Please provide theatre id'],
       trim: true
     },
+    user: {
+      type: mongoose.Schema.ObjectId,
+      ref: 'User',
+      required: [true, 'Please provide user id']
+    },
     seatType: {
       type: String,
       enum: ['vip', 'executive', 'normal'],
@@ -23,28 +28,30 @@ const bookingSchema = new mongoose.Schema<IBookingSchema>(
       trim: true
     },
     seats: {
-      type: [String],
+      type: [{ row: Number, column: Number }],
       required: [true, 'Please provide seat/seats'],
-      trim: true
+      trim: true,
+      _id: false
+    },
+    movieDateAndTime: {
+      type: Date,
+      required: [true, 'Please provide movie date and time']
     },
     ticketPrice: {
       type: Number,
       required: [true, 'Please provide price']
-    },
-    showDate: {
-      type: Date,
-      required: [true, 'Please provide show date']
-    },
-    showTime: {
-      type: Date,
-      required: [true, 'Please provide show time']
     },
     createdAt: {
       type: Date,
       default: Date.now()
     }
   },
-  { toJSON: { virtuals: true }, toObject: { virtuals: true } }
+  {
+    toJSON: { virtuals: true },
+    toObject: { virtuals: true },
+    id: false,
+    versionKey: false
+  }
 );
 
 bookingSchema.virtual('totalPrice').get(function (): number {

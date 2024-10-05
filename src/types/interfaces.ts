@@ -110,9 +110,9 @@ export interface ITheatreSchema {
     foodCourt: boolean;
   };
   seats: {
-    vip: string[];
-    executive: string[];
-    normal: string[];
+    vip: { row: number; column: number };
+    executive: { row: number; column: number };
+    normal: { row: number; column: number };
   };
   createdAt: Date;
 }
@@ -137,9 +137,9 @@ export interface ITheatreReqBody {
     foodCourt: boolean;
   };
   seats: {
-    vip: string[];
-    executive: string[];
-    normal: string[];
+    vip: { row: number; column: number };
+    executive: { row: number; column: number };
+    normal: { row: number; column: number };
   };
 }
 
@@ -161,13 +161,13 @@ export interface IReleaseReqBody {
 }
 
 export interface IBookingSchema {
+  user: Types.ObjectId;
   movie: Types.ObjectId;
   theatre: Types.ObjectId;
   seatType: Seat;
-  seats: string[];
+  seats: { row: number; column: number }[];
+  movieDateAndTime: Date;
   ticketPrice: number;
-  showDate: Date;
-  showTime: Date;
   createdAt: Date;
 }
 
@@ -175,10 +175,14 @@ export interface IBookingReqBody {
   movie: Types.ObjectId;
   theatre: Types.ObjectId;
   seatType: Seat;
-  seats: string[];
+  seats: { row: number; column: number }[];
+  movieDateAndTime: Date;
   ticketPrice: number;
-  showDate: Date;
-  showTime: Date;
+}
+
+export interface IBookingRequest extends Request {
+  user: Types.ObjectId;
+  body: IBookingReqBody;
 }
 
 export interface IReviewSchema {
