@@ -78,36 +78,9 @@ const theatreSchema = new mongoose.Schema<ITheatreSchema>({
     _id: false
   },
   seats: {
-    vip: {
-      row: {
-        type: Number,
-        default: 0
-      },
-      column: {
-        type: Number,
-        default: 0
-      }
-    },
-    executive: {
-      row: {
-        type: Number,
-        default: 0
-      },
-      column: {
-        type: Number,
-        default: 0
-      }
-    },
-    normal: {
-      row: {
-        type: Number,
-        default: 0
-      },
-      column: {
-        type: Number,
-        default: 0
-      }
-    }
+    vip: [String],
+    executive: [String],
+    normal: [String]
   },
   createdAt: {
     type: Date,

@@ -2,20 +2,13 @@ import { Request, Response, NextFunction } from 'express';
 
 import User from '../models/userModel';
 import { post, controller, bodyValidator, del, use, get } from './decorators';
-import SendMail from '../utils/SendMail';
+// import SendMail from '../utils/SendMail';
 import { generateJwt, generateOTP } from '../utils/helpers';
 import AppError from '../utils/AppError';
 import protect from '../middlewares/protect';
 import accessAllowedTo from '../middlewares/accessAllowedTo';
 
-import {
-  ILoginReqBody,
-  IReqWithUser,
-  IResBody,
-  ISignupReqBody,
-  IUserSchema,
-  ResStatus
-} from '../types';
+import { ILoginReqBody, IReqWithUser, IResBody, ISignupReqBody, ResStatus } from '../types';
 
 @controller('/auth')
 class AuthController {
@@ -33,7 +26,7 @@ class AuthController {
       let user = await User.findOne({ email });
 
       if (!user) {
-        user = await User.create<Partial<IUserSchema>>({
+        user = await User.create<ISignupReqBody>({
           email,
           OTP
         });
@@ -46,7 +39,7 @@ class AuthController {
         await user.save({ validateBeforeSave: true });
       }
 
-      SendMail.verifyEmail({ email: user.email, OTP });
+      // SendMail.verifyEmail({ email: user.email, OTP });
 
       return res.status(201).json({
         status: ResStatus.Success,

@@ -4,7 +4,7 @@ import { Request } from 'express';
 import AppError from '../utils/AppError';
 
 import { ResStatus } from './enums';
-import { Identity, MultiplexChain, Role } from './typeAlias';
+import { Identity, MultiplexChain, Role, Seat } from './typeAlias';
 
 export interface IUserSchema {
   _id: Types.ObjectId;
@@ -110,18 +110,9 @@ export interface ITheatreSchema {
     foodCourt: boolean;
   };
   seats: {
-    vip: {
-      row: number;
-      column: number;
-    };
-    executive: {
-      row: number;
-      column: number;
-    };
-    normal: {
-      row: number;
-      column: number;
-    };
+    vip: string[];
+    executive: string[];
+    normal: string[];
   };
   createdAt: Date;
 }
@@ -146,18 +137,9 @@ export interface ITheatreReqBody {
     foodCourt: boolean;
   };
   seats: {
-    vip: {
-      row: number;
-      column: number;
-    };
-    executive: {
-      row: number;
-      column: number;
-    };
-    normal: {
-      row: number;
-      column: number;
-    };
+    vip: string[];
+    executive: string[];
+    normal: string[];
   };
 }
 
@@ -179,8 +161,9 @@ export interface IReleaseReqBody {
 export interface IBookingSchema {
   movie: Types.ObjectId;
   theatre: Types.ObjectId;
-  seats: string | string[];
-  price: number;
+  seatType: Seat;
+  seats: string[];
+  ticketPrice: number;
   showDate: Date;
   showTime: Date;
   createdAt: Date;
@@ -189,8 +172,9 @@ export interface IBookingSchema {
 export interface IBookingReqBody {
   movie: Types.ObjectId;
   theatre: Types.ObjectId;
-  seats: string | string[];
-  price: number;
+  seatType: Seat;
+  seats: string[];
+  ticketPrice: number;
   showDate: Date;
   showTime: Date;
 }
@@ -212,7 +196,7 @@ export interface IReviewReqBody {
   rating: number;
 }
 
-export interface ICreateReviewRequest extends Request { // FIXME:
+export interface ICreateReviewRequest extends Request {
   params: { id: string };
   body: IReviewReqBody;
   user: IUserSchema;

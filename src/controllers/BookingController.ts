@@ -39,7 +39,7 @@ class BookingController {
   }
 
   @post('/')
-  @bodyValidator('movie', 'theatre', 'seats', 'price', 'showDate', 'showTime')
+  @bodyValidator('movie', 'theatre', 'seatType', 'seats', 'ticketPrice', 'showDate', 'showTime')
   @use(protect)
   @use(accessAllowedTo('user'))
   async createBooking(
@@ -69,7 +69,7 @@ class BookingController {
   ): Promise<any> {
     try {
       const { id } = req.params;
-      if (!id) return next (new AppError('Please provide id', 400));
+      if (!id) return next(new AppError('Please provide id', 400));
 
       const booking = await Booking.findOne({ _id: id }).populate({
         path: 'movie theatre',
