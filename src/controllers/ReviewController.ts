@@ -8,7 +8,7 @@ import protect from '../middlewares/protect';
 import accessAllowedTo from '../middlewares/accessAllowedTo';
 import ApiFeatures from '../utils/ApiFeatures';
 
-import { IReqParamsWithId, IResBody, ICreateReviewRequest, ResStatus, IReviewReqBody } from '../types';
+import { IReqParamsWithId, IResBody, IReviewRequest, ResStatus, IReviewReqBody } from '../types';
 
 @controller('/reviews')
 class ReviewController {
@@ -45,7 +45,7 @@ class ReviewController {
   @use(protect)
   @use(accessAllowedTo('user'))
   async createReview(
-    req: ICreateReviewRequest,
+    req: IReviewRequest,
     res: Response<IResBody>,
     next: NextFunction
   ): Promise<any> {
@@ -93,7 +93,7 @@ class ReviewController {
   @use(protect)
   @use(accessAllowedTo('user'))
   async updateReview(
-    req: Request<IReqParamsWithId, {}, IReviewReqBody>,
+    req: IReviewRequest,
     res: Response<IResBody>,
     next: NextFunction
   ): Promise<any> {
@@ -107,7 +107,7 @@ class ReviewController {
       const payload = { review: movieReview, rating };
 
       const review = await Review.findOneAndUpdate(
-        { _id: id },
+        { _id: id, user: req.user._id },
         { $set: payload },
         { runValidators: true, new: true }
       );
@@ -124,7 +124,7 @@ class ReviewController {
   @use(protect)
   @use(accessAllowedTo('user'))
   async deleteReview(
-    req: Request<IReqParamsWithId>,
+    req: IReviewRequest,
     res: Response<IResBody>,
     next: NextFunction
   ): Promise<any> {
@@ -132,7 +132,11 @@ class ReviewController {
       const { id } = req.params;
       if (!id) return next(new AppError('Please provide review id', 400));
 
-      const review = await Review.findOneAndDelete({ _id: id });
+      const review = await Review.findOneAndDelete({
+        _id: id,
+        user: req.user._id
+      });
+
       if (!review) return next(new AppError('No review found', 404));
 
       return res.status(204).json({ status: ResStatus.Success });

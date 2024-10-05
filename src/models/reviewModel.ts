@@ -1,5 +1,7 @@
 import mongoose from 'mongoose';
 
+import { updateMovieRatings } from '../middlewares/updateMovieRatings';
+
 import { IReviewSchema } from '../types';
 
 const reviewSchema = new mongoose.Schema<IReviewSchema>({
@@ -31,6 +33,12 @@ const reviewSchema = new mongoose.Schema<IReviewSchema>({
     default: Date.now()
   }
 });
+
+reviewSchema.index({ movie: 1, user: 1 }, { unique: true });
+
+reviewSchema.post('save', updateMovieRatings);
+reviewSchema.post('findOneAndUpdate', updateMovieRatings);
+reviewSchema.post('findOneAndDelete', updateMovieRatings);
 
 const Review = mongoose.model<IReviewSchema>('Review', reviewSchema);
 

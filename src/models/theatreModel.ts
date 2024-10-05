@@ -23,7 +23,7 @@ const theatreSchema = new mongoose.Schema<ITheatreSchema>({
   address: {
     type: String,
     trim: true,
-    maxlength: [100, 'Max characters should be 100 or less']
+    maxlength: [120, 'Max characters should be 120 or less']
   },
   locality: {
     type: String,
@@ -78,36 +78,9 @@ const theatreSchema = new mongoose.Schema<ITheatreSchema>({
     _id: false
   },
   seats: {
-    vip: {
-      row: {
-        type: Number,
-        default: 0
-      },
-      column: {
-        type: Number,
-        default: 0
-      }
-    },
-    executive: {
-      row: {
-        type: Number,
-        default: 0
-      },
-      column: {
-        type: Number,
-        default: 0
-      }
-    },
-    normal: {
-      row: {
-        type: Number,
-        default: 0
-      },
-      column: {
-        type: Number,
-        default: 0
-      }
-    }
+    vip: [String],
+    executive: [String],
+    normal: [String]
   },
   createdAt: {
     type: Date,
