@@ -43,8 +43,13 @@ class App {
 
   private async connectDB() {
     try {
-      await mongoose.connect(process.env.DB!);
-      mongoose.set({ debug: true });
+      const DB =
+        process.env.NODE_ENV === 'development'
+          ? process.env.DB!
+          : process.env.PRO_DB!;
+
+      await mongoose.connect(DB);
+      if (process.env.NODE_ENV === 'development') mongoose.set({ debug: true });
 
       console.log('DB connected successfully');
     } catch (err) {
