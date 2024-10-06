@@ -128,6 +128,8 @@ class MovieController {
   }
 
   @del('/:id')
+  @use(protect)
+  @use(accessAllowedTo('admin'))
   async deleteMovie(
     req: Request<IReqParamsWithId>,
     res: Response<IResBody>,

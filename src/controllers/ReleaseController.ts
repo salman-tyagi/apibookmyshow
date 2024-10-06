@@ -96,6 +96,8 @@ class ReleaseController {
   }
 
   @patch('/:id')
+  @use(protect)
+  @use(accessAllowedTo('admin'))
   async updateRelease(
     req: Request<IReqParamsWithId, {}, IReleaseReqBody>,
     res: Response<IResBody>,
@@ -135,6 +137,8 @@ class ReleaseController {
   }
 
   @del('/:id')
+  @use(protect)
+  @use(accessAllowedTo('admin'))
   async deleteRelease(
     req: Request<IReqParamsWithId>,
     res: Response<IResBody>,

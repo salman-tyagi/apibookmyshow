@@ -2,7 +2,7 @@ import { Request, Response, NextFunction } from 'express';
 
 import User from '../models/userModel';
 import { post, controller, bodyValidator, del, use, get } from './decorators';
-// import SendMail from '../utils/SendMail';
+import SendMail from '../utils/SendMail';
 import { generateJwt, generateOTP } from '../utils/helpers';
 import AppError from '../utils/AppError';
 import protect from '../middlewares/protect';
@@ -39,7 +39,7 @@ class AuthController {
         await user.save({ validateBeforeSave: true });
       }
 
-      // SendMail.verifyEmail({ email: user.email, OTP });
+      SendMail.verifyEmail({ email: user.email, OTP });
 
       return res.status(201).json({
         status: ResStatus.Success,
