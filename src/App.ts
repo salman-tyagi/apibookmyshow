@@ -34,9 +34,9 @@ class App {
 
     this.app.use(globalErrorMiddleware);
 
-    this.app.listen(Number(process.env.PORT), 'localhost', () => {
+    this.app.listen(Number(process.env.PORT!), '0.0.0.0', () => {
       console.log(
-        `Listening on the port ${process.env.PORT} in ${process.env.NODE_ENV}`
+        `Listening on the port ${process.env.PORT!} in ${process.env.NODE_ENV}`
       );
     });
   }
