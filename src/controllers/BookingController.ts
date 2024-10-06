@@ -72,7 +72,7 @@ class BookingController {
 
   @get('/:id')
   @use(protect)
-  @use(accessAllowedTo('admin'))
+  @use(accessAllowedTo('user'))
   async getBooking(
     req: Request<IReqParamsWithId>,
     res: Response<IResBody>,
