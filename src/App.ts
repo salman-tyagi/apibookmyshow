@@ -2,6 +2,10 @@ import express, { NextFunction, Request, Response } from 'express';
 import mongoose from 'mongoose';
 import morgan from 'morgan';
 import helmet from 'helmet';
+import cors, { CorsOptions } from 'cors';
+import sanitize from 'express-mongo-sanitize';
+import hpp from 'hpp';
+import rateLimit, { Options } from 'express-rate-limit';
 
 import './controllers/AuthController';
 import './controllers/UserController';
@@ -19,13 +23,39 @@ import globalErrorMiddleware from './middlewares/globalErrorMiddleware';
 class App {
   private app: express.Express = express();
 
+  private corsOptions: CorsOptions = { origin: 'http://localhost:5173' };
+
+  private limiterOptions: Partial<Options> = {
+    windowMs: 24 * 60 * 60 * 1000,
+    limit: 1000,
+    message: 'Too many requests, 1000 requests per day'
+  };
+
   constructor() {
     this.connectDB();
 
     this.app.use(helmet());
     this.app.use(morgan('dev'));
-    this.app.use(express.json());
+    this.app.use(rateLimit(this.limiterOptions));
+    this.app.use(express.json({ limit: '5kb' }));
+    this.app.use(hpp());
+    this.app.use(sanitize());
+    this.app.use(cors(this.corsOptions));
 
+    this.app.get(
+      '/',
+      async (req: Request, res: Response, next: NextFunction): Promise<any> => {
+        try {
+          return res.send(
+            `<h2 style='text-align: center;'>${new Date(
+              '2024-09-19T23:45'
+            )}</h2>`
+          );
+        } catch (err) {
+          next(err);
+        }
+      }
+    );
     this.app.use('/api/v1', router);
 
     this.app.all('*', (req: Request, res: Response, next: NextFunction): void => {
