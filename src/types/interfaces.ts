@@ -208,6 +208,17 @@ export interface IReviewRequest extends Request { // Using with delete review
   user: IUserSchema;
 }
 
+export interface ICitySchema {
+  city: string;
+  image: string;
+  createdAt: Date;
+}
+
+export interface ICityReqBody {
+  city: string;
+  // image: string;
+}
+
 export interface IResBody {
   status: ResStatus.Success;
   result?: number;
