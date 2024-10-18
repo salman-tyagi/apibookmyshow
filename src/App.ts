@@ -14,6 +14,7 @@ import './controllers/TheatreController';
 import './controllers/ReleaseController';
 import './controllers/BookingController';
 import './controllers/ReviewController';
+import './controllers/CityController';
 
 import { router } from './controllers/decorators';
 
@@ -56,11 +57,15 @@ class App {
         }
       }
     );
+
     this.app.use('/api/v1', router);
 
-    this.app.all('*', (req: Request, res: Response, next: NextFunction): void => {
-      return next(new AppError(`${req.originalUrl} does not exist`, 404));
-    });
+    this.app.all(
+      '*',
+      (req: Request, res: Response, next: NextFunction): void => {
+        return next(new AppError(`${req.originalUrl} does not exist`, 404));
+      }
+    );
 
     this.app.use(globalErrorMiddleware);
 
