@@ -6,6 +6,7 @@ import { bodyValidator, controller, del, get, patch, post, use } from './decorat
 
 import protect from '../middlewares/protect';
 import accessAllowedTo from '../middlewares/accessAllowedTo';
+import upload from '../middlewares/multer';
 
 import AppError from '../utils/AppError';
 import ApiFeatures from '../utils/ApiFeatures';
@@ -84,9 +85,9 @@ class CityController {
   }
 
   @patch('/:id')
-  @bodyValidator('city')
   @use(protect)
   @use(accessAllowedTo('admin'))
+  @use(upload.single('cityImage'))
   async updateCity(
     req: Request<IReqParamsWithId, {}, ICityReqBody>,
     res: Response<IResBody>,
@@ -96,19 +97,30 @@ class CityController {
       const { id } = req.params;
       if (!id) return next(new AppError('Please provide city id', 400));
 
-      const { city: CityName } = req.body;
+      const { city } = req.body;
+      const image = req.file;
 
-      const city = await City.findOneAndUpdate(
+      if (!city && !image)
+        return next(
+          new AppError('Please provide city name or city image', 400)
+        );
+
+      const payload: { city?: string; cityImage?: string } = {};
+
+      if (city) payload.city = city;
+      if (image?.filename) payload.cityImage = image.filename;
+
+      const updatedCity = await City.findOneAndUpdate(
         { _id: id },
-        { $set: { city: CityName } },
+        { $set: payload },
         { new: true, runValidators: true }
       );
 
-      if (!city) return next(new AppError('No city found', 404));
+      if (!updatedCity) return next(new AppError('No city found', 404));
 
       return res.status(201).json({
         status: ResStatus.Success,
-        data: city
+        data: updatedCity
       });
     } catch (err) {
       next(err);
