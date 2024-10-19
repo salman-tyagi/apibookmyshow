@@ -10,7 +10,7 @@ const citySchema = new mongoose.Schema<ICitySchema>({
     maxlength: [30, 'Max length should be 30 or less'],
     trim: true
   },
-  image: {
+  cityImage: {
     type: String,
     trim: true
   },

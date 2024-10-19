@@ -210,13 +210,12 @@ export interface IReviewRequest extends Request { // Using with delete review
 
 export interface ICitySchema {
   city: string;
-  image: string;
+  cityImage: string;
   createdAt: Date;
 }
 
 export interface ICityReqBody {
   city: string;
-  // image: string;
 }
 
 export interface IResBody {
