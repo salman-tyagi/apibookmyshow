@@ -1,5 +1,7 @@
-import multer from 'multer';
+import multer, { FileFilterCallback } from 'multer';
 import { Request } from 'express';
+
+import AppError from '../utils/AppError';
 
 const storage = multer.diskStorage({
   destination: (
@@ -7,7 +9,7 @@ const storage = multer.diskStorage({
     file: Express.Multer.File,
     cb: (err: Error | null, destination: string) => void
   ) => {
-    cb(null, 'public/images/');
+    cb(new AppError('Please provide images folder', 400), 'public/images/');
   },
 
   filename: (
@@ -22,6 +24,21 @@ const storage = multer.diskStorage({
   }
 });
 
-const upload = multer({ storage });
+const acceptImages = ['png', 'jpg', 'jpeg', 'webp'];
+
+function fileFilter(
+  req: Request,
+  file: Express.Multer.File,
+  cb: FileFilterCallback
+) {
+  const fileExt = file.mimetype.split('/').at(-1);
+  const message = `Only ${acceptImages.join(', ')} image allowed!`;
+
+  if (fileExt && !acceptImages.includes(fileExt)) {
+    cb(new AppError(message, 400));
+  } else cb(null, true);
+}
+
+const upload = multer({ storage, fileFilter });
 
 export default upload;
