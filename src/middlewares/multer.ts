@@ -9,7 +9,7 @@ const storage = multer.diskStorage({
     file: Express.Multer.File,
     cb: (err: Error | null, destination: string) => void
   ) => {
-    cb(new AppError('Please provide images folder', 400), 'public/images/');
+    cb(null, 'public/images/');
   },
 
   filename: (
