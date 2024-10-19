@@ -34,7 +34,7 @@ const movieSchema = new mongoose.Schema<IMovieSchema>({
   ratingsQuantity: {
     type: Number,
     default: 0,
-    min: 1,
+    // min: 1,
     max: 10
   },
   ratingsAverage: {

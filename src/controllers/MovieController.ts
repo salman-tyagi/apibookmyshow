@@ -2,11 +2,14 @@ import { NextFunction, Request, Response } from 'express';
 import { Types } from 'mongoose';
 
 import Movie from '../models/movieModel';
+
 import { get, controller, bodyValidator, post, use, patch, del } from './decorators';
+
 import protect from '../middlewares/protect';
 import accessAllowedTo from '../middlewares/accessAllowedTo';
-import AppError from '../utils/AppError';
 import upload from '../middlewares/multer';
+
+import AppError from '../utils/AppError';
 import ApiFeatures from '../utils/ApiFeatures';
 
 import { IMovieReqBody, IReqParamsWithId, IResBody, ResStatus } from '../types';
@@ -100,10 +103,10 @@ class MovieController {
       if (!id) return next(new AppError('Please provide id', 400));
       
       const { body } = req;
-      
-      if (req.files && Object.keys(req.files).length) {
-        const files = req.files as { [fieldname: string]: Express.Multer.File[] };
-        
+      const files = req.files as { [fieldname: string]: Express.Multer.File[] };
+      const { length } = Object.keys(files);
+
+      if (files && length) {
         const image = files.image?.at(0)?.filename;
         body.image = image;
 
