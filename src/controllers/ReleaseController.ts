@@ -26,7 +26,7 @@ class ReleaseController {
 
       const releases = await apiFeatures.query.populate({
         path: 'movie theatre',
-        select: 'title theatre locality'
+        // select: 'theatre locality'
       })
 
       return res.status(200).json({
