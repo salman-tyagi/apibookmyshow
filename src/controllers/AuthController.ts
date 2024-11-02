@@ -39,7 +39,7 @@ class AuthController {
         await user.save({ validateBeforeSave: true });
       }
 
-      SendMail.verifyEmail({ email: user.email, OTP });
+      // SendMail.verifyEmail({ email: user.email, OTP });
 
       return res.status(201).json({
         status: ResStatus.Success,
@@ -63,7 +63,7 @@ class AuthController {
       const user = await User.findOneAndUpdate(
         { email, OTP },
         { $set: { verified: true }, $unset: { OTP: '' } },
-        { runValidators: true, new: true }
+        { runValidators: true, new: true, projection: { email } }
       );
 
       if (!user) return next(new AppError('Incorrect email or OTP', 401));
@@ -76,8 +76,8 @@ class AuthController {
 
       return res.status(201).json({
         status: ResStatus.Success,
-        token
-        // data: user
+        token,
+        data: user
       });
     } catch (err) {
       next(err);

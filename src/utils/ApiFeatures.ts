@@ -35,7 +35,7 @@ class ApiFeatures {
       const projection = this.queryReq.fields.split(',').join(' ');
       this.query = this.query.select(projection);
     } else {
-      this.query = this.query.select('-__v');
+      this.query = this.query.select('-__v -createdAt');
     }
 
     return this;

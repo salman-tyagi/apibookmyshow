@@ -149,6 +149,7 @@ export interface IReleaseSchema {
   releaseDate: Date;
   screen: Screen[];
   movieDateAndTime: Date[];
+  slug: string;
   createdAt: Date;
 }
 

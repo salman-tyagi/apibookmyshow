@@ -28,6 +28,10 @@ const releaseSchema = new mongoose.Schema<IReleaseSchema>({
     type: [Date],
     required: [true, 'Please provide show time']
   },
+  slug: {
+    type: String,
+    trim: true
+  },
   createdAt: {
     type: Date,
     default: Date.now()
