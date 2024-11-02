@@ -1,6 +1,9 @@
 import { NextFunction, Request, Response } from 'express';
+import slugify from 'slugify';
 
 import Release from '../models/releaseModel';
+import Movie from '../models/movieModel';
+
 import { bodyValidator, controller, del, get, patch, post, use } from './decorators';
 import protect from '../middlewares/protect';
 import accessAllowedTo from '../middlewares/accessAllowedTo';
@@ -25,9 +28,9 @@ class ReleaseController {
         .pagination();
 
       const releases = await apiFeatures.query.populate({
-        path: 'movie theatre',
-        // select: 'theatre locality'
-      })
+        path: 'movie',
+        select: 'title ratingsAverage votes genres image slug'
+      });
 
       return res.status(200).json({
         status: ResStatus.Success,
@@ -52,12 +55,19 @@ class ReleaseController {
       const { movie, theatre, releaseDate, screen, movieDateAndTime } =
         req.body;
 
+      const _movie = await Movie.findOne({ _id: movie });
+      if (!_movie)
+        return next(new AppError('Movie not released', 400));
+
+      const slug = slugify(_movie.title, { lower: true, strict: true });
+
       const release = await Release.create<IReleaseReqBody>({
         movie,
         theatre,
         releaseDate,
         screen,
-        movieDateAndTime
+        movieDateAndTime,
+        slug
       });
 
       return res.status(201).json({
@@ -69,21 +79,26 @@ class ReleaseController {
     }
   }
 
-  @get('/:id')
+  @get('/:slug')
   async getRelease(
-    req: Request<IReqParamsWithId>,
+    req: Request<{ slug: string }>,
     res: Response<IResBody>,
     next: NextFunction
   ): Promise<any> {
     try {
-      const { id } = req.params;
-      if (!id) return next(new AppError('Please provide id', 400));
+      const { slug } = req.params;
+      if (!slug) return next(new AppError('Please provide slug', 400));
 
-      const release = await Release.findOne({ _id: id }).populate({
-        path: 'movie theatre',
-        select: 'title theatre locality'
+      const apiFeatures = new ApiFeatures(Release.findOne({ slug }), req.query)
+        .filter()
+        .sort()
+        .projection()
+        .pagination();
+
+      const release = await apiFeatures.query.populate({
+        path: 'movie',
+        select: 'title image poster  duration genres languages certification'
       });
-
       if (!release) return next(new AppError('No release found', 404));
 
       return res.status(200).json({
@@ -109,7 +124,6 @@ class ReleaseController {
 
       const { movie, theatre, releaseDate, screen, movieDateAndTime } =
         req.body;
-        
 
       if (!movie && !theatre && !releaseDate && !screen && !movieDateAndTime)
         return next(
