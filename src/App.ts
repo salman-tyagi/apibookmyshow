@@ -24,7 +24,12 @@ import globalErrorMiddleware from './middlewares/globalErrorMiddleware';
 class App {
   private app: express.Express = express();
 
-  private corsOptions: CorsOptions = { origin: 'http://localhost:5173' };
+  private corsOptions: CorsOptions = {
+    origin:
+      process.env.NODE_ENV === 'development'
+        ? process.env.LocalOrigin
+        : process.env.ProductionOrigin
+  };
 
   private limiterOptions: Partial<Options> = {
     windowMs: 24 * 60 * 60 * 1000,
