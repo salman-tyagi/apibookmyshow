@@ -39,7 +39,7 @@ class AuthController {
         await user.save({ validateBeforeSave: true });
       }
 
-      // SendMail.verifyEmail({ email: user.email, OTP });
+      SendMail.verifyEmail({ email: user.email, OTP });
 
       return res.status(201).json({
         status: ResStatus.Success,
