@@ -27,14 +27,14 @@ class App {
   private corsOptions: CorsOptions = {
     origin:
       process.env.NODE_ENV === 'development'
-        ? process.env.LocalOrigin
-        : process.env.ProductionOrigin
+        ? 'http://localhost:5173'
+        : 'https://build-bookmyshow.onrender.com'
   };
 
   private limiterOptions: Partial<Options> = {
     windowMs: 24 * 60 * 60 * 1000,
-    limit: 1000,
-    message: 'Too many requests, 1000 requests per day'
+    limit: 500,
+    message: 'Too many requests, allowed 500 requests per day.'
   };
 
   constructor() {
