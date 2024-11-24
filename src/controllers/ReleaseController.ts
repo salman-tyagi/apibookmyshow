@@ -56,8 +56,7 @@ class ReleaseController {
         req.body;
 
       const _movie = await Movie.findOne({ _id: movie });
-      if (!_movie)
-        return next(new AppError('Movie not released', 400));
+      if (!_movie) return next(new AppError('Movie not released', 400));
 
       const slug = slugify(_movie.title, { lower: true, strict: true });
 
@@ -97,7 +96,7 @@ class ReleaseController {
 
       const release = await apiFeatures.query.populate({
         path: 'movie',
-        select: 'title image poster  duration genres languages certification'
+        select: 'title image poster duration genres languages certification'
       });
       if (!release) return next(new AppError('No release found', 404));
 
@@ -167,6 +166,115 @@ class ReleaseController {
 
       return res.status(204).json({
         status: ResStatus.Success
+      });
+    } catch (err) {
+      next(err);
+    }
+  }
+
+  @get('/theatres/:movieSlug')
+  async getReleaseTheatres(
+    req: Request<{ movieSlug: string }, {}, {}, { dateString: string }>,
+    res: Response<IResBody>,
+    next: NextFunction
+  ): Promise<any> {
+    try {
+      const { movieSlug } = req.params;
+      if (!movieSlug)
+        return next(new AppError('Please provide release movie slug', 400));
+
+      const { dateString } = req.query;
+
+      if (!dateString)
+        return next(new AppError('Please provide release date', 400));
+
+      const release = await Release.aggregate([
+        {
+          $match: {
+            slug: movieSlug
+          }
+        },
+        {
+          $unwind: '$movieDateAndTime'
+        },
+        {
+          $match: {
+            movieDateAndTime: {
+              $gte: new Date(new Date(dateString).toDateString()),
+              $lt: new Date(
+                new Date(
+                  new Date(dateString).setDate(
+                    new Date(dateString).getDate() + 1
+                  )
+                ).toDateString()
+              )
+            }
+          }
+        },
+        {
+          $lookup: {
+            from: 'movies',
+            localField: 'movie',
+            foreignField: '_id',
+            as: 'movie',
+            pipeline: [
+              {
+                $project: {
+                  _id: 1,
+                  title: 1,
+                  certification: 1,
+                  genres: 1
+                }
+              }
+            ]
+          }
+        },
+
+        {
+          $lookup: {
+            from: 'theatres',
+            localField: 'theatre',
+            foreignField: '_id',
+            as: 'theatre',
+            pipeline: [
+              {
+                $project: {
+                  _id: 1,
+                  theatre: 1,
+                  locality: 1,
+                  facilities: 1
+                }
+              }
+            ]
+          }
+        },
+        {
+          $project: {
+            movie: {
+              $first: '$movie'
+            },
+            theatre: {
+              $first: '$theatre'
+            },
+            // releaseDate: 1,
+            screen: 1,
+            movieDateAndTime: 1,
+            slug: 1
+          }
+        },
+        {
+          $sort: {
+            movieDateAndTime: 1
+          }
+        }
+      ]);
+
+      if (!release) return next(new AppError('No release found', 404));
+
+      return res.status(200).json({
+        status: ResStatus.Success,
+        result: release.length,
+        data: release
       });
     } catch (err) {
       next(err);
