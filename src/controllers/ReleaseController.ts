@@ -43,7 +43,13 @@ class ReleaseController {
   }
 
   @post('/')
-  @bodyValidator('movie', 'theatre', 'releaseDate', 'screen', 'movieDateAndTime')
+  @bodyValidator(
+    'movie',
+    'theatre',
+    'releaseDate',
+    'screen',
+    'movieDateAndTime'
+  )
   @use(protect)
   @use(accessAllowedTo('admin'))
   async createRelease(
@@ -174,7 +180,12 @@ class ReleaseController {
 
   @get('/theatres/:movieSlug')
   async getReleaseTheatres(
-    req: Request<{ movieSlug: string }, {}, {}, { dateString: string }>,
+    req: Request<
+      { movieSlug: string },
+      {},
+      {},
+      { dateString: string; screen: string }
+    >,
     res: Response<IResBody>,
     next: NextFunction
   ): Promise<any> {
@@ -183,7 +194,7 @@ class ReleaseController {
       if (!movieSlug)
         return next(new AppError('Please provide release movie slug', 400));
 
-      const { dateString } = req.query;
+      const { dateString, screen = '2d' } = req.query;
 
       if (!dateString)
         return next(new AppError('Please provide release date', 400));
@@ -198,6 +209,9 @@ class ReleaseController {
           $unwind: '$movieDateAndTime'
         },
         {
+          $unwind: '$screen'
+        },
+        {
           $match: {
             movieDateAndTime: {
               $gte: new Date(new Date(dateString).toDateString()),
@@ -208,7 +222,8 @@ class ReleaseController {
                   )
                 ).toDateString()
               )
-            }
+            },
+            screen
           }
         },
         {
@@ -258,8 +273,8 @@ class ReleaseController {
             },
             // releaseDate: 1,
             screen: 1,
-            movieDateAndTime: 1,
-            slug: 1
+            movieDateAndTime: 1
+            // slug: 1
           }
         },
         {
