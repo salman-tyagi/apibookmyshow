@@ -265,21 +265,55 @@ class ReleaseController {
         },
         {
           $project: {
-            movie: {
-              $first: '$movie'
-            },
-            theatre: {
-              $first: '$theatre'
-            },
-            // releaseDate: 1,
+            movie: { $first: '$movie' },
+            theatre: { $first: '$theatre' },
             screen: 1,
-            movieDateAndTime: 1
-            // slug: 1
+            movieDateAndTime: 1,
+            releaseDate: 1
           }
         },
         {
-          $sort: {
-            movieDateAndTime: 1
+          $group: {
+            _id: '$theatre.theatre',
+            movieTitle: {
+              $push: '$movie.title'
+            },
+            releaseDate: {
+              $push: '$releaseDate'
+            },
+            certification: {
+              $push: '$movie.certification'
+            },
+            genres: {
+              $push: '$movie.genres'
+            },
+            timings: {
+              $push: '$movieDateAndTime'
+            },
+            facilities: {
+              $push: '$theatre.facilities'
+            },
+            locality: {
+              $push: '$theatre.locality'
+            }
+          }
+        },
+        {
+          $addFields: {
+            theatre: '$_id'
+          }
+        },
+        {
+          $project: {
+            _id: 0,
+            theatre: 1,
+            movieTitle: { $first: '$movieTitle' },
+            certification: { $first: '$certification' },
+            genres: { $first: '$genres' },
+            releaseDate: { $first: '$releaseDate' },
+            timings: 1,
+            facilities: { $first: '$facilities' },
+            locality: { $first: '$locality' }
           }
         }
       ]);
