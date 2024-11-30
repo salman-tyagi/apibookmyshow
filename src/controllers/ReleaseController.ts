@@ -94,16 +94,20 @@ class ReleaseController {
       const { slug } = req.params;
       if (!slug) return next(new AppError('Please provide slug', 400));
 
-      const apiFeatures = new ApiFeatures(Release.findOne({ slug }), req.query)
-        .filter()
-        .sort()
-        .projection()
-        .pagination();
+      // const apiFeatures = new ApiFeatures(Release.findOne({ slug }), req.query)
+      //   .filter()
+      //   .sort()
+      //   .projection()
+      //   .pagination();
 
-      const release = await apiFeatures.query.populate({
-        path: 'movie',
-        select: 'title image poster duration genres languages certification'
-      });
+      const release = await Release.findOne({ slug })
+        .populate({
+          path: 'movie',
+          select:
+            'title image poster duration genres languages certification about cast crew'
+        })
+        .select('-createdAt -__v');
+
       if (!release) return next(new AppError('No release found', 404));
 
       return res.status(200).json({

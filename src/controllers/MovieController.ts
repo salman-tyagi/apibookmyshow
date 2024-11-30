@@ -199,7 +199,8 @@ class MovieController {
             review: '$review.review',
             rating: '$review.rating',
             username: '$user.username',
-            email: '$user.email'
+            email: '$user.email',
+            createdAt: '$review.createdAt'
           }
         },
         {
