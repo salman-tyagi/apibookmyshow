@@ -100,7 +100,7 @@ class ReleaseController {
         .populate({
           path: 'movie',
           select:
-            'title image poster duration genres languages certification about cast crew'
+            'title image poster ratingsAverage votes duration genres languages certification about cast crew'
         })
         .select('-createdAt -__v');
 
@@ -359,7 +359,7 @@ class ReleaseController {
         })
           .populate({
             path: 'movie',
-            select: 'image title ratingsAverage votes'
+            select: 'image title ratingsAverage votes slug'
           })
           .select('movie');
 
