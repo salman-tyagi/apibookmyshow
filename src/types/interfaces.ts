@@ -37,6 +37,7 @@ export interface ILoginReqBody {
 }
 
 export interface IMovieSchema {
+  _id?: Types.ObjectId;
   title: string;
   image: string;
   poster: string;

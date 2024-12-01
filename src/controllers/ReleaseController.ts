@@ -4,13 +4,15 @@ import slugify from 'slugify';
 import Release from '../models/releaseModel';
 import Movie from '../models/movieModel';
 
+// prettier-ignore
 import { bodyValidator, controller, del, get, patch, post, use } from './decorators';
 import protect from '../middlewares/protect';
 import accessAllowedTo from '../middlewares/accessAllowedTo';
 import AppError from '../utils/AppError';
 import ApiFeatures from '../utils/ApiFeatures';
 
-import { IReleaseReqBody, IReqParamsWithId, IResBody, ResStatus } from '../types';
+// prettier-ignore
+import { IMovieSchema, IReleaseReqBody, IReqParamsWithId, IResBody, ResStatus } from '../types';
 
 @controller('/releases')
 class ReleaseController {
@@ -93,12 +95,6 @@ class ReleaseController {
     try {
       const { slug } = req.params;
       if (!slug) return next(new AppError('Please provide slug', 400));
-
-      // const apiFeatures = new ApiFeatures(Release.findOne({ slug }), req.query)
-      //   .filter()
-      //   .sort()
-      //   .projection()
-      //   .pagination();
 
       const release = await Release.findOne({ slug })
         .populate({
@@ -328,6 +324,56 @@ class ReleaseController {
         status: ResStatus.Success,
         result: release.length,
         data: release
+      });
+    } catch (err) {
+      next(err);
+    }
+  }
+
+  @get('/:movieSlug/related-releases')
+  async getRelatedReleases(
+    req: Request<{ movieSlug: string }>,
+    res: Response<IResBody>,
+    next: NextFunction
+  ) {
+    try {
+      const { movieSlug } = req.params;
+      if (!movieSlug)
+        return next(new AppError('Please provide movie slug', 400));
+
+      const movie = await Movie.findOne<IMovieSchema>({ slug: movieSlug });
+      if (!movie)
+        return next(new AppError('No movie found with this slug', 404));
+
+      const movies = await Movie.find<IMovieSchema>(
+        {
+          genres: { $in: movie.genres }
+        },
+        {},
+        { limit: 11 } // Why 11? because to show only limited results
+      );
+
+      const releasePromises = movies.map(async movie => {
+        const release = await Release.findOne({
+          movie: movie._id
+        })
+          .populate({
+            path: 'movie',
+            select: 'image title ratingsAverage votes'
+          })
+          .select('movie');
+
+        return release;
+      });
+
+      const relatedReleases = (await Promise.all(releasePromises)).filter(
+        release => release
+      );
+
+      return res.status(200).json({
+        status: ResStatus.Success,
+        result: relatedReleases.length,
+        data: relatedReleases
       });
     } catch (err) {
       next(err);
