@@ -188,28 +188,28 @@ class ReleaseController {
     >,
     res: Response<IResBody>,
     next: NextFunction
-  ): Promise<any> {
+  ): Promise<AppError | Response | void> {
     try {
       const { movieSlug } = req.params;
       if (!movieSlug)
         return next(new AppError('Please provide release movie slug', 400));
 
-      const { dateString, screen = '2d' } = req.query;
+      const { dateString, screen } = req.query;
 
-      if (!dateString)
-        return next(new AppError('Please provide release date', 400));
+      if (!dateString || !screen)
+        return next(new AppError('Please provide date and screen', 400));
 
-      const release = await Release.aggregate([
+      const releaseTheatres = await Release.aggregate([
         {
           $match: {
-            slug: movieSlug
+            slug: movieSlug,
+            screen: {
+              $in: [screen]
+            }
           }
         },
         {
           $unwind: '$movieDateAndTime'
-        },
-        {
-          $unwind: '$screen'
         },
         {
           $match: {
@@ -222,8 +222,7 @@ class ReleaseController {
                   )
                 ).toDateString()
               )
-            },
-            screen
+            }
           }
         },
         {
@@ -231,99 +230,134 @@ class ReleaseController {
             from: 'movies',
             localField: 'movie',
             foreignField: '_id',
-            as: 'movie',
-            pipeline: [
-              {
-                $project: {
-                  _id: 1,
-                  title: 1,
-                  certification: 1,
-                  genres: 1
-                }
-              }
-            ]
+            as: 'movies'
           }
         },
-
         {
           $lookup: {
             from: 'theatres',
             localField: 'theatre',
             foreignField: '_id',
-            as: 'theatre',
-            pipeline: [
-              {
-                $project: {
-                  _id: 1,
-                  theatre: 1,
-                  locality: 1,
-                  facilities: 1
-                }
-              }
-            ]
+            as: 'theatres'
+          }
+        },
+        {
+          $addFields: {
+            title: {
+              $first: '$movies.title'
+            },
+            languages: {
+              $first: '$movies.languages'
+            },
+            genres: {
+              $first: '$movies.genres'
+            },
+            certification: {
+              $first: '$movies.certification'
+            },
+            theatre: {
+              $first: '$theatres.theatre'
+            },
+            locality: {
+              $first: '$theatres.locality'
+            },
+            facilities: {
+              $first: '$theatres.facilities'
+            }
           }
         },
         {
           $project: {
-            movie: { $first: '$movie' },
-            theatre: { $first: '$theatre' },
-            screen: 1,
+            title: 1,
+            genres: 1,
+            certification: 1,
             movieDateAndTime: 1,
-            releaseDate: 1
+            languages: 1,
+            theatre: 1,
+            locality: 1,
+            facilities: 1
           }
         },
         {
           $group: {
-            _id: '$theatre.theatre',
-            movieTitle: {
-              $push: '$movie.title'
-            },
-            releaseDate: {
-              $push: '$releaseDate'
-            },
-            certification: {
-              $push: '$movie.certification'
+            _id: '$theatre',
+            titles: {
+              $push: '$title'
             },
             genres: {
-              $push: '$movie.genres'
+              $push: '$genres'
+            },
+            certifications: {
+              $push: '$certification'
+            },
+            localities: {
+              $push: '$locality'
             },
             timings: {
               $push: '$movieDateAndTime'
             },
-            facilities: {
-              $push: '$theatre.facilities'
+            languages: {
+              $push: '$languages'
             },
-            locality: {
-              $push: '$theatre.locality'
+            facilities: {
+              $push: '$facilities'
             }
           }
         },
         {
           $addFields: {
-            theatre: '$_id'
+            theatre: '$_id',
+            title: {
+              $first: '$titles'
+            },
+            genres: {
+              $first: '$genres'
+            },
+            certification: {
+              $first: '$certifications'
+            },
+            locality: {
+              $first: '$localities'
+            },
+            languages: {
+              $first: '$languages'
+            },
+            mTicket: {
+              $first: '$facilities.mTicket'
+            },
+            foodAndBeverages: {
+              $first: '$facilities.foodAndBeverages'
+            },
+            ticketCancellation: {
+              $first: '$facilities.ticketCancellation'
+            }
           }
         },
         {
           $project: {
             _id: 0,
-            theatre: 1,
-            movieTitle: { $first: '$movieTitle' },
-            certification: { $first: '$certification' },
-            genres: { $first: '$genres' },
-            releaseDate: { $first: '$releaseDate' },
-            timings: 1,
-            facilities: { $first: '$facilities' },
-            locality: { $first: '$locality' }
+            titles: 0,
+            certifications: 0,
+            localities: 0,
+            facilities: 0
+          }
+        },
+        {
+          $sort: {
+            theatre: 1
           }
         }
       ]);
 
-      if (!release) return next(new AppError('No release found', 404));
+      if (!releaseTheatres.length)
+        return next(
+          new AppError('Invalid release date or screen, no theatre found', 404)
+        );
 
       return res.status(200).json({
         status: ResStatus.Success,
-        result: release.length,
-        data: release
+        result: releaseTheatres.length,
+        data: releaseTheatres
       });
     } catch (err) {
       next(err);
