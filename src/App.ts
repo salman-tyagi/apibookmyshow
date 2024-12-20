@@ -86,7 +86,7 @@ class App {
       const DB =
         process.env.NODE_ENV === 'development'
           ? process.env.DB!
-          : process.env.PRO_DB!;
+          : process.env.DB!;
 
       await mongoose.connect(DB);
       if (process.env.NODE_ENV === 'development') mongoose.set({ debug: true });

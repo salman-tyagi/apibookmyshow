@@ -1,5 +1,6 @@
 import jwt from 'jsonwebtoken';
 import { Types } from 'mongoose';
+import slugify from 'slugify';
 
 export const generateOTP = (): number => {
   return parseInt(
@@ -19,3 +20,7 @@ export const verifyJwt = <T = jwt.JwtPayload>(
   token: string,
   secretKey: string
 ): T => jwt.verify(token, secretKey) as T;
+
+export const createSlug = (slug: string): string => {
+  return slugify(slug, { lower: true, strict: true });
+};

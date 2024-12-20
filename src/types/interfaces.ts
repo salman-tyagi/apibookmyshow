@@ -4,7 +4,7 @@ import { Request } from 'express';
 import AppError from '../utils/AppError';
 
 import { ResStatus } from './enums';
-import { Identity, MultiplexChain, Role, Screen, Seat } from './typeAlias';
+import { Identity, Language, MultiplexChain, Role, Screen, Seat } from './typeAlias';
 
 export interface IUserSchema {
   _id: Types.ObjectId;
@@ -147,8 +147,14 @@ export interface ITheatreReqBody {
 export interface IReleaseSchema {
   movie: Types.ObjectId;
   theatre: Types.ObjectId;
-  releaseDate: Date;
-  screen: Screen[];
+  // releaseDate: Date;
+  screen: Screen;
+  language: Language;
+  price: {
+    vip: number;
+    executive: number;
+    normal: number;
+  };
   movieDateAndTime: Date[];
   slug: string;
   createdAt: Date;
@@ -157,9 +163,18 @@ export interface IReleaseSchema {
 export interface IReleaseReqBody {
   movie: Types.ObjectId;
   theatre: Types.ObjectId;
-  releaseDate: Date;
-  screen: Screen[];
+  screen: Screen;
+  language: Language;
+  price: {
+    vip: number;
+    executive: number;
+    normal: number;
+  };
   movieDateAndTime: Date[];
+}
+
+export interface ICreateRelease extends IReleaseReqBody {
+  slug: string;
 }
 
 export interface IBookingSchema {
