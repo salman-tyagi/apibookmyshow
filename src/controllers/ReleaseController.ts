@@ -1,8 +1,8 @@
 import { NextFunction, Request, Response } from 'express';
-import slugify from 'slugify';
 
 import Release from '../models/releaseModel';
 import Movie from '../models/movieModel';
+import Theatre from '../models/theatreModel';
 
 // prettier-ignore
 import { bodyValidator, controller, del, get, patch, post, use } from './decorators';
@@ -10,9 +10,10 @@ import protect from '../middlewares/protect';
 import accessAllowedTo from '../middlewares/accessAllowedTo';
 import AppError from '../utils/AppError';
 import ApiFeatures from '../utils/ApiFeatures';
+import { createSlug } from '../utils/helpers';
 
 // prettier-ignore
-import { IMovieSchema, IReleaseReqBody, IReqParamsWithId, IResBody, ResStatus } from '../types';
+import { ICreateRelease, IMovieSchema, IReleaseReqBody, IReqParamsWithId, IResBody, ResStatus } from '../types';
 
 @controller('/releases')
 class ReleaseController {
@@ -45,13 +46,7 @@ class ReleaseController {
   }
 
   @post('/')
-  @bodyValidator(
-    'movie',
-    'theatre',
-    'releaseDate',
-    'screen',
-    'movieDateAndTime'
-  )
+  @bodyValidator('movie', 'theatre', 'screen', 'language', 'price', 'movieDateAndTime')
   @use(protect)
   @use(accessAllowedTo('admin'))
   async createRelease(
@@ -60,21 +55,23 @@ class ReleaseController {
     next: NextFunction
   ): Promise<any> {
     try {
-      const { movie, theatre, releaseDate, screen, movieDateAndTime } =
+      const { movie, theatre, screen, language, price, movieDateAndTime } =
         req.body;
 
       const _movie = await Movie.findOne({ _id: movie });
       if (!_movie) return next(new AppError('Movie not released', 400));
 
-      const slug = slugify(_movie.title, { lower: true, strict: true });
+      const _theatre = await Theatre.findOne({ _id: theatre });
+      if (!_theatre) return next(new AppError('Theatre not found', 400));
 
-      const release = await Release.create<IReleaseReqBody>({
+      const release = await Release.create<ICreateRelease>({
         movie,
         theatre,
-        releaseDate,
         screen,
+        language,
+        price,
         movieDateAndTime,
-        slug
+        slug: createSlug(_movie.title)
       });
 
       return res.status(201).json({

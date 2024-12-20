@@ -9,7 +9,7 @@ const mongoInvalidIdErr = (err: any) => {
 };
 
 const mongoDuplicateErr = (err: any) => {
-  const message = `Duplicate ${Object.keys(err.errorResponse.keyPattern).join(
+  const message = `Duplicate: ${Object.keys(err.errorResponse.keyPattern).join(
     ', '
   )} is not allowed`;
 
