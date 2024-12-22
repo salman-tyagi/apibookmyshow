@@ -139,29 +139,22 @@ class ReleaseController {
 
       if (!releases.length) return next(new AppError('No release found', 404));
 
-      const screens = [] as string[];
-      const languages = [] as string[];
+      const languageAndScreen = {} as { [key: string]: string[] };
 
       const uniqueRecommendedRelease = releases.reduce(
         (acc: any[], release) => {
-          // screens.push(release.screen);
-          // languages.push(release.language);
+          if (!languageAndScreen[release.language])
+            languageAndScreen[release.language] = [];
 
-          //   One way of filtering the unique values
-          if (!screens.map(screen => screen).includes(release.screen))
-            screens.push(release.screen);
-
-          if (!languages.map(language => language).includes(release.language))
-            languages.push(release.language);
-
-          // delete release.screen;
-          // delete release.language;
+          languageAndScreen[release.language].push(release.screen);
 
           if (!acc.map(item => item.slug).includes(release.slug)) {
             acc.push({
-              ...release.toObject(),
-              screen: screens,
-              language: languages
+              _id: release._id,
+              movie: release.movie,
+              releaseDate: release.releaseDate,
+              languageAndScreen,
+              slug: release.slug
             });
           }
 
