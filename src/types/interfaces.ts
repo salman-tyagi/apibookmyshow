@@ -147,7 +147,7 @@ export interface ITheatreReqBody {
 export interface IReleaseSchema {
   movie: Types.ObjectId;
   theatre: Types.ObjectId;
-  // releaseDate: Date;
+  releaseDate: Date;
   screen: Screen;
   language: Language;
   price: {
@@ -170,6 +170,7 @@ export interface IReleaseReqBody {
     executive: number;
     normal: number;
   };
+  releaseDate: Date;
   movieDateAndTime: Date[];
 }
 
@@ -265,4 +266,17 @@ export interface IResError {
 export interface IMovieReviewStats {
   numReviews: number;
   avgReviews: number;
+}
+
+export interface RecommendedRelease {
+  _id: Types.ObjectId;
+  movie: {
+    _id: Types.ObjectId;
+    title: string;
+    image: string;
+    genres: string[];
+    ratingsAverage: number;
+    votes: number;
+  };
+  slug: string;
 }

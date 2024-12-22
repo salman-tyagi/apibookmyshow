@@ -15,10 +15,10 @@ const releaseSchema = new mongoose.Schema<IReleaseSchema>({
     required: [true, 'Please provide theatre id'],
     trim: true
   },
-  // releaseDate: {
-  //   type: Date,
-  //   required: [true, 'Please provide release date']
-  // },
+  releaseDate: {
+    type: Date,
+    required: [true, 'Please provide release date']
+  },
   screen: {
     type: String,
     enum: ['2d', '3d', 'imax', 'imax4d', 'ice3d', 'ice', '4dx', '4dx3d'],
@@ -57,7 +57,10 @@ const releaseSchema = new mongoose.Schema<IReleaseSchema>({
   }
 });
 
-releaseSchema.index({ movie: 1, theatre: 1 }, { unique: true });
+releaseSchema.index(
+  { theatre: 1, movie: 1, screen: 1, language: 1 },
+  { unique: true }
+);
 releaseSchema.index({ theatre: 1, movieDateAndTime: 1 }, { unique: true });
 
 const Release = mongoose.model<IReleaseSchema>('Release', releaseSchema);

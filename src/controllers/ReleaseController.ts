@@ -8,12 +8,13 @@ import Theatre from '../models/theatreModel';
 import { bodyValidator, controller, del, get, patch, post, use } from './decorators';
 import protect from '../middlewares/protect';
 import accessAllowedTo from '../middlewares/accessAllowedTo';
+
 import AppError from '../utils/AppError';
 import ApiFeatures from '../utils/ApiFeatures';
 import { createSlug } from '../utils/helpers';
 
 // prettier-ignore
-import { ICreateRelease, IMovieSchema, IReleaseReqBody, IReqParamsWithId, IResBody, ResStatus } from '../types';
+import { ICreateRelease, IMovieSchema, IReleaseReqBody, IReqParamsWithId, IResBody, RecommendedRelease, ResStatus } from '../types';
 
 @controller('/releases')
 class ReleaseController {
@@ -22,7 +23,7 @@ class ReleaseController {
     req: Request,
     res: Response<IResBody>,
     next: NextFunction
-  ): Promise<any> {
+  ): Promise<Response<IResBody> | undefined> {
     try {
       const apiFeatures = new ApiFeatures(Release.find(), req.query)
         .filter()
@@ -31,14 +32,47 @@ class ReleaseController {
         .pagination();
 
       const releases = await apiFeatures.query.populate({
-        path: 'movie',
-        select: 'title ratingsAverage votes genres image slug'
+        path: 'movie theatre',
+        select: 'title theatre'
       });
 
       return res.status(200).json({
         status: ResStatus.Success,
         result: releases.length,
         data: releases
+      });
+    } catch (err) {
+      next(err);
+    }
+  }
+
+  @get('/recommended-releases')
+  async getAllRecommendedReleases(
+    req: Request,
+    res: Response<IResBody>,
+    next: NextFunction
+  ) {
+    try {
+      const recommendedReleases = await Release.find<RecommendedRelease>()
+        .select('movie slug')
+        .populate({
+          path: 'movie',
+          select: 'title image genres ratingsAverage votes'
+        });
+
+      const uniqueReleases = recommendedReleases.reduce(
+        (acc: RecommendedRelease[], release) => {
+          if (!acc.map(item => item.slug).includes(release.slug))
+            acc.push(release);
+          return acc;
+        },
+        []
+      );
+
+      return res.status(200).json({
+        status: ResStatus.Success,
+        result: uniqueReleases.length,
+        data: uniqueReleases
       });
     } catch (err) {
       next(err);
@@ -55,7 +89,7 @@ class ReleaseController {
     next: NextFunction
   ): Promise<any> {
     try {
-      const { movie, theatre, screen, language, price, movieDateAndTime } =
+      const { movie, theatre, screen, language, price, releaseDate, movieDateAndTime } =
         req.body;
 
       const _movie = await Movie.findOne({ _id: movie });
@@ -71,6 +105,7 @@ class ReleaseController {
         language,
         price,
         movieDateAndTime,
+        releaseDate,
         slug: createSlug(_movie.title)
       });
 
@@ -93,19 +128,52 @@ class ReleaseController {
       const { slug } = req.params;
       if (!slug) return next(new AppError('Please provide slug', 400));
 
-      const release = await Release.findOne({ slug })
+      const releases = await Release.find({ slug })
+        .select('movie screen language releaseDate slug')
         .populate({
           path: 'movie',
           select:
-            'title image poster ratingsAverage votes duration genres languages certification about cast crew'
+            'title image poster ratingsAverage votes duration genres certification about cast crew'
         })
         .select('-createdAt -__v');
 
-      if (!release) return next(new AppError('No release found', 404));
+      if (!releases.length) return next(new AppError('No release found', 404));
+
+      const screens = [] as string[];
+      const languages = [] as string[];
+
+      const uniqueRecommendedRelease = releases.reduce(
+        (acc: any[], release) => {
+          // screens.push(release.screen);
+          // languages.push(release.language);
+
+          //   One way of filtering the unique values
+          if (!screens.map(screen => screen).includes(release.screen))
+            screens.push(release.screen);
+
+          if (!languages.map(language => language).includes(release.language))
+            languages.push(release.language);
+
+          // delete release.screen;
+          // delete release.language;
+
+          if (!acc.map(item => item.slug).includes(release.slug)) {
+            acc.push({
+              ...release.toObject(),
+              screen: screens,
+              language: languages
+            });
+          }
+
+          return acc;
+        },
+        []
+      );
 
       return res.status(200).json({
         status: ResStatus.Success,
-        data: release
+        result: uniqueRecommendedRelease.length,
+        data: uniqueRecommendedRelease[0]
       });
     } catch (err) {
       next(err);
