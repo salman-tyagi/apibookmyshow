@@ -33,8 +33,8 @@ class App {
 
   private limiterOptions: Partial<Options> = {
     windowMs: 24 * 60 * 60 * 1000,
-    limit: 500,
-    message: 'Too many requests, allowed 500 requests per day.'
+    limit: 1000,
+    message: 'Too many requests, allowed 1000 requests per day.'
   };
 
   constructor() {
