@@ -238,49 +238,30 @@ class ReleaseController {
 
   @get('/theatres/:movieSlug')
   async getReleaseTheatres(
-    req: Request<
-      { movieSlug: string },
-      {},
-      {},
-      { dateString: string; screen: string }
-    >,
+    req: Request & {
+      params: { movieSlug: string };
+      query: { date: string; language: string; screen: string };
+    },
     res: Response<IResBody>,
     next: NextFunction
   ): Promise<AppError | Response | void> {
     try {
       const { movieSlug } = req.params;
+
       if (!movieSlug)
         return next(new AppError('Please provide release movie slug', 400));
 
-      const { dateString, screen } = req.query;
+      const { date, language, screen } = req.query;
 
-      if (!dateString || !screen)
-        return next(new AppError('Please provide date and screen', 400));
+      if (!language || !screen)
+        return next(new AppError('Please provide language and screen', 400));
 
-      const releaseTheatres = await Release.aggregate([
+      const pipeline = [
         {
           $match: {
             slug: movieSlug,
-            screen: {
-              $in: [screen]
-            }
-          }
-        },
-        {
-          $unwind: '$movieDateAndTime'
-        },
-        {
-          $match: {
-            movieDateAndTime: {
-              $gte: new Date(new Date(dateString).toDateString()),
-              $lt: new Date(
-                new Date(
-                  new Date(dateString).setDate(
-                    new Date(dateString).getDate() + 1
-                  )
-                ).toDateString()
-              )
-            }
+            language,
+            screen
           }
         },
         {
@@ -288,7 +269,7 @@ class ReleaseController {
             from: 'movies',
             localField: 'movie',
             foreignField: '_id',
-            as: 'movies'
+            as: 'movieData'
           }
         },
         {
@@ -296,120 +277,168 @@ class ReleaseController {
             from: 'theatres',
             localField: 'theatre',
             foreignField: '_id',
-            as: 'theatres'
+            as: 'theatreData'
           }
         },
         {
-          $addFields: {
-            title: {
-              $first: '$movies.title'
-            },
-            languages: {
-              $first: '$movies.languages'
-            },
-            genres: {
-              $first: '$movies.genres'
-            },
-            certification: {
-              $first: '$movies.certification'
-            },
-            theatre: {
-              $first: '$theatres.theatre'
-            },
-            locality: {
-              $first: '$theatres.locality'
-            },
-            facilities: {
-              $first: '$theatres.facilities'
-            }
-          }
+          $unwind: '$movieDateAndTime'
         },
         {
-          $project: {
-            title: 1,
-            genres: 1,
-            certification: 1,
-            movieDateAndTime: 1,
-            languages: 1,
-            theatre: 1,
-            locality: 1,
-            facilities: 1
-          }
+          $unwind: '$movieData'
+        },
+        {
+          $unwind: '$theatreData'
         },
         {
           $group: {
-            _id: '$theatre',
+            _id: '$theatreData.theatre',
             titles: {
-              $push: '$title'
+              $push: '$movieData.title'
             },
-            genres: {
-              $push: '$genres'
+            ratingsQuantities: {
+              $push: '$movieData.ratingsQuantity'
+            },
+            ratingsAverages: {
+              $push: '$movieData.ratingsAverage'
+            },
+            genresArr: {
+              $push: '$movieData.genres'
             },
             certifications: {
-              $push: '$certification'
+              $push: '$movieData.certification'
             },
-            localities: {
-              $push: '$locality'
+            mTickets: {
+              $push: '$theatreData.facilities.mTicket'
+            },
+            foodAndBeveragesArr: {
+              $push: '$theatreData.facilities.foodAndBeverages'
+            },
+            ticketCancellations: {
+              $push: '$theatreData.facilities.ticketCancellation'
             },
             timings: {
               $push: '$movieDateAndTime'
             },
-            languages: {
-              $push: '$languages'
-            },
-            facilities: {
-              $push: '$facilities'
+            movieDates: {
+              $push: '$movieDateAndTime'
             }
+          }
+        },
+        {
+          $unwind: '$movieDates'
+        }
+      ];
+
+      if (date)
+        pipeline.push({
+          $match: {
+            movieDates: {
+              $gte: new Date(date),
+              $lt: new Date(
+                new Date(date).setDate(new Date(date).getDate() + 1)
+              )
+            }
+          }
+        });
+
+      pipeline.push(
+        {
+          $group: {
+            _id: '$_id',
+            titlesArr: { $push: '$titles' },
+            ratingsQuantitiesArr: {
+              $push: '$ratingsQuantities'
+            },
+            ratingsAveragesArr: {
+              $push: '$ratingsAverages'
+            },
+            genresArr: { $push: '$genresArr' },
+            certificationsArr: {
+              $push: '$certifications'
+            },
+            mTicketsArr: { $push: '$mTickets' },
+            foodAndBeveragesArr: {
+              $push: '$foodAndBeveragesArr'
+            },
+            ticketCancellationsArr: {
+              $push: '$ticketCancellations'
+            },
+            timingsArr: { $push: '$timings' },
+            movieDates: { $push: '$movieDates' }
           }
         },
         {
           $addFields: {
             theatre: '$_id',
-            title: {
-              $first: '$titles'
+            title: { $first: '$titlesArr' },
+            ratingsQuantity: {
+              $first: '$ratingsQuantitiesArr'
             },
-            genres: {
-              $first: '$genres'
+            ratingsAverage: {
+              $first: '$ratingsAveragesArr'
             },
+            genres: { $first: '$genresArr' },
             certification: {
-              $first: '$certifications'
+              $first: '$certificationsArr'
             },
-            locality: {
-              $first: '$localities'
-            },
-            languages: {
-              $first: '$languages'
-            },
-            mTicket: {
-              $first: '$facilities.mTicket'
-            },
+            mTicket: { $first: '$mTicketsArr' },
             foodAndBeverages: {
-              $first: '$facilities.foodAndBeverages'
+              $first: '$foodAndBeveragesArr'
             },
             ticketCancellation: {
-              $first: '$facilities.ticketCancellation'
+              $first: '$ticketCancellationsArr'
+            },
+            timings: {
+              $first: '$timingsArr'
             }
+          }
+        },
+        {
+          $addFields: {
+            title: { $first: '$title' },
+            ratingsQuantity: {
+              $first: '$ratingsQuantity'
+            },
+            ratingsAverage: {
+              $first: '$ratingsAverage'
+            },
+            genres: { $first: '$genres' },
+            certification: { $first: '$certification' },
+            mTicket: { $first: '$mTicket' },
+            foodAndBeverages: {
+              $first: '$foodAndBeverages'
+            },
+            ticketCancellation: {
+              $first: '$ticketCancellation'
+            },
+            filteredMovieDates: '$movieDates'
           }
         },
         {
           $project: {
             _id: 0,
-            titles: 0,
-            certifications: 0,
-            localities: 0,
-            facilities: 0
+            titlesArr: 0,
+            ratingsQuantitiesArr: 0,
+            ratingsAveragesArr: 0,
+            genresArr: 0,
+            certificationsArr: 0,
+            mTicketsArr: 0,
+            foodAndBeveragesArr: 0,
+            ticketCancellationsArr: 0,
+            timingsArr: 0,
+            movieDates: 0
           }
         },
         {
-          $sort: {
-            theatre: 1
-          }
+          $sort: { theatre: -1 }
         }
-      ]);
+      );
+
+      const releaseTheatres = await Release.aggregate(pipeline);
 
       if (!releaseTheatres.length)
         return next(
-          new AppError('Invalid release date or screen, no theatre found', 404)
+          new AppError('Invalid language or screen, no theatre found for this release', 404)
         );
 
       return res.status(200).json({
