@@ -321,6 +321,9 @@ class ReleaseController {
             },
             movieDates: {
               $push: '$movieDateAndTime'
+            },
+            prices: {
+              $push: '$price'
             }
           }
         },
@@ -364,7 +367,8 @@ class ReleaseController {
               $push: '$ticketCancellations'
             },
             timingsArr: { $push: '$timings' },
-            movieDates: { $push: '$movieDates' }
+            movieDates: { $push: '$movieDates' },
+            pricesArr: { $push: '$prices' }
           }
         },
         {
@@ -390,7 +394,8 @@ class ReleaseController {
             },
             timings: {
               $first: '$timingsArr'
-            }
+            },
+            price: { $first: '$pricesArr' }
           }
         },
         {
@@ -411,6 +416,7 @@ class ReleaseController {
             ticketCancellation: {
               $first: '$ticketCancellation'
             },
+            price: { $first: '$price' },
             filteredMovieDates: '$movieDates'
           }
         },
@@ -426,7 +432,8 @@ class ReleaseController {
             foodAndBeveragesArr: 0,
             ticketCancellationsArr: 0,
             timingsArr: 0,
-            movieDates: 0
+            movieDates: 0,
+            pricesArr: 0
           }
         },
         {
