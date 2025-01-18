@@ -27,7 +27,7 @@ class App {
   private corsOptions: CorsOptions = {
     origin:
       process.env.NODE_ENV === 'development'
-        ? 'http://localhost:5173'
+        ? ['http://salman.io']
         : 'https://build-bookmyshow.onrender.com'
   };
 
