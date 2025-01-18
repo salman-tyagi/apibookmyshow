@@ -11,6 +11,7 @@ export interface IUserSchema {
   firstName: string;
   lastName: string;
   email: string;
+  photo: string;
   OTP: number;
   mobile: number;
   role: Role;
