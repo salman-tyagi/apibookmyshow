@@ -5,13 +5,13 @@ import { IUserSchema } from '../types';
 const userSchema = new mongoose.Schema<IUserSchema>({
   firstName: {
     type: String,
-    minlength: [6, 'Min required length 6'],
+    minlength: [2, 'Min required length 6'],
     maxlength: [30, 'Max required length 30'],
     trim: true
   },
   lastName: {
     type: String,
-    minlength: [6, 'Min required length 6'],
+    minlength: [2, 'Min required length 6'],
     maxlength: [30, 'Max required length 30'],
     trim: true
   },
@@ -23,6 +23,7 @@ const userSchema = new mongoose.Schema<IUserSchema>({
     maxlength: [30, 'Max required length 30'],
     trim: true
   },
+  photo: { type: String },
   OTP: {
     type: Number,
     minlength: [10, 'Min required length 10'],
